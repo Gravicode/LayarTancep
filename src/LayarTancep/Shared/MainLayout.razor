@@ -1,0 +1,96 @@
+﻿@inherits LayoutComponentBase
+@using Blazored.Toast.Configuration
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavMgr
+@inject IJSRuntime jsRuntime
+@inject UserProfileService Userservice
+<PageTitle>LayarTancep App</PageTitle>
+@inject IJSRuntime IJS
+
+<NavMenu></NavMenu>
+<div id="wrapper">
+    <!-- Sidebar -->
+   <SideBar></SideBar>
+    <div class="@(AdditionalCss)" id="content-wrapper">
+        <CascadingValue Value="this">
+            <!-- Main Content -->
+            @Body
+        </CascadingValue>
+
+        <!-- /.container-fluid -->
+        <!-- Sticky Footer -->
+       <FooterPage></FooterPage>
+    </div>
+    <!-- /.content-wrapper -->
+</div>
+<!-- /#wrapper -->
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+<!-- Logout Modal-->
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                <a class="btn btn-primary" href="logout">Logout</a>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+
+<BlazoredToasts Position="ToastPosition.BottomRight"
+                Timeout="10"
+                SuccessClass="success-toast-override"
+                SuccessIconClass="fa fa-thumbs-up"
+                ErrorIconClass="fa fa-bug" />
+
+@code {
+    [Parameter]
+    public string AdditionalCss { get; set; }
+
+    [Parameter]
+    public bool IsTransparent { get; set; } = true;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    async Task Keluar()
+    {
+        NavMgr.NavigateTo($"/logout", true);
+        //await localStorage.SetItemAsync(AppConstants.NameKey, "");
+        //NavMgr.NavigateTo($"/login");
+    }
+
+
+    string Nama = "Saya";
+    protected override async Task OnInitializedAsync()
+    {
+
+
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var UserName = user.Identity.Name;
+            Nama = Userservice.GetUserByEmail(UserName)?.FullName;
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+            IJS.InvokeVoidAsync("InitJs");
+        }
+    }
+}

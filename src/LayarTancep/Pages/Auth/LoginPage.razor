@@ -1,0 +1,164 @@
+﻿@page "/sign-in"
+@page "/loginControl"
+@layout NoAuthLayout
+
+@using System.Web;
+@using Microsoft.AspNetCore.WebUtilities
+@inject IJSRuntime jsRuntime
+@inject IToastService toastService
+@inject NavigationManager NavMgr
+
+<section class="login-main-wrapper">
+    <div class="container-fluid pl-0 pr-0">
+        <div class="row no-gutters">
+            <div class="col-md-5 p-5 bg-white full-height">
+                <AuthorizeView>
+                    <Authorized>                        
+                        <div class="login-main-left">
+                            <div class="text-center mb-5 login-main-left-header pt-4">
+                                <img src="img/favicon.png" class="img-fluid" alt="LOGO">
+                                <h5 class="mt-3 mb-3">Welcome to Vidoe</h5>
+                                <p>Anda sudah login.</p>
+                            </div>
+                            <div>
+                               <div class="col-xl-5 offset-xl-3">
+                                    <div class="login-register-page">
+                                        <!-- Welcome Text -->
+                                        <div class="welcome-text">
+                                            <span>Mau log out? <a href="/logout">Sign Out!</a></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </Authorized>
+                    <NotAuthorized>
+                        <div class="login-main-left">
+                            <div class="text-center mb-5 login-main-left-header pt-4">
+                                <img src="img/favicon.png" class="img-fluid" alt="LOGO">
+                                <h5 class="mt-3 mb-3">Welcome to Vidoe</h5>
+                                <p>It is a long established fact that a reader <br> will be distracted by the readable.</p>
+                            </div>
+                            <div>
+                                <div class="form-group">
+                                    <label>Username</label>
+                                    <input type="text" @bind="@Username" class="form-control" placeholder="Enter username">
+                                </div>
+                                <div class="form-group">
+                                    <label>Password</label>
+                                    <input type="password" class="form-control" @bind="@Password" @onkeyup="KeyUp" placeholder="Password">
+                                </div>
+                                <div class="mt-4">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <button type="button" @onclick="LoginNow" @onkeyup="@KeyUp" class="btn btn-outline-primary btn-block btn-lg">Sign In</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-5">
+                                <p class="light-gray">Don’t have an account? <a href="register">Sign Up</a></p>
+                                <p class="light-gray">Forgot password? <a href="" @onclick:preventDefault @onclick="GotoForgotPassword">Send Password</a></p>
+                            </div>
+                        </div>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+            <div class="col-md-7">
+                <div class="login-main-right bg-white p-5 mt-5 mb-5">
+                    <div class="owl-carousel owl-carousel-login">
+                        <div class="item">
+                            <div class="carousel-login-card text-center">
+                                <img src="img/login.png" class="img-fluid" alt="LOGO">
+                                <h5 class="mt-5 mb-3">​Watch videos offline</h5>
+                                <p class="mb-4">when an unknown printer took a galley of type and scrambled<br> it to make a type specimen book. It has survived not <br>only five centuries</p>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="carousel-login-card text-center">
+                                <img src="img/login.png" class="img-fluid" alt="LOGO">
+                                <h5 class="mt-5 mb-3">Download videos effortlessly</h5>
+                                <p class="mb-4">when an unknown printer took a galley of type and scrambled<br> it to make a type specimen book. It has survived not <br>only five centuries</p>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="carousel-login-card text-center">
+                                <img src="img/login.png" class="img-fluid" alt="LOGO">
+                                <h5 class="mt-5 mb-3">Create GIFs</h5>
+                                <p class="mb-4">when an unknown printer took a galley of type and scrambled<br> it to make a type specimen book. It has survived not <br>only five centuries</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
+
+@code {
+    bool showError = false;
+    string Username = "";
+    string Password = "";
+    async Task KeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await LoginNow();
+            //Console.WriteLine(this.Value);
+        }
+    }
+
+    async Task GotoForgotPassword()
+    {
+        NavMgr.NavigateTo("/forgot-password");
+    }
+    private string encode(string param)
+    {
+        return HttpUtility.UrlEncode(param);
+    }
+    async Task LoginNow()
+    {
+        var ErrMsg = "";
+        if (string.IsNullOrEmpty(Username))
+        {
+            ErrMsg += "Tolong isi username.";
+        }
+        if (string.IsNullOrEmpty(Password))
+        {
+            ErrMsg += "Tolong isi password.";
+        }
+        if (ErrMsg.Length > 0)
+        {
+            toastService.ShowError(ErrMsg, "Perhatian");
+        }
+        else
+        {
+            string logUrl = $"/login?paramUsername={encode(Username)}&paramPassword={encode(Password)}";
+            await jsRuntime.InvokeAsync<object>("OpenUrl", logUrl);
+        }
+        //NavMgr.NavigateTo(logUrl);
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = NavMgr.ToAbsoluteUri(NavMgr.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("result", out var resultString))
+        {
+            if (!string.IsNullOrEmpty(resultString))
+            {
+                var result = bool.Parse(resultString);
+                if (!result)
+                {
+                    showError = true;
+                    toastService.ShowWarning("username/password salah atau tidak terdaftar", "Perhatian");
+                }
+            }
+        }
+    }
+}

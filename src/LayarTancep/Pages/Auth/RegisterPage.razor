@@ -1,0 +1,210 @@
+﻿@page "/register"
+@inject IJSRuntime IJS
+@inject NavigationManager NavMgr
+@inject IToastService toastService
+@using LayarTancep.Tools
+@layout NoAuthLayout
+
+<section class="login-main-wrapper">
+    <div class="container-fluid pl-0 pr-0">
+        <div class="row no-gutters">
+            <div class="col-md-5 p-5 bg-white full-height">
+                <div class="login-main-left">
+                    <div class="text-center mb-5 login-main-left-header pt-4">
+                        <img src="img/favicon.png" class="img-fluid" alt="LOGO">
+                        <h5 class="mt-3 mb-3">Welcome to Vidoe</h5>
+                        <p>It is a long established fact that a reader <br> will be distracted by the readable.</p>
+                    </div>
+                    <div >
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" class="form-control" @bind="DataUser.Email" placeholder="Enter email">
+                        </div>  
+                        <div class="form-group">
+                            <label>First Name</label>
+                            <input type="text" class="form-control" @bind="DataUser.FirstName" placeholder="Enter first name">
+                        </div>  
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <input type="text" class="form-control" @bind="DataUser.LastName" placeholder="Enter last name">
+                        </div>
+                        <div class="form-group">
+                            <label>Mobile number</label>
+                            <input type="text" class="form-control" @bind="DataUser.Phone" placeholder="Enter mobile number">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" class="form-control" @bind="DataUser.Password" placeholder="Password">
+                        </div>  
+                        <div class="form-group">
+                            <label>Retype Password</label>
+                            <input type="password" class="form-control" @bind="RetypePass" placeholder="Retype Password">
+                        </div>
+                        <div class="form-group">
+                            <img src="@CaptchaImage" style="text-align:center;margin-bottom:5px;mr-1;mb-1">
+                            <button @onclick="GenerateCaptcha" class="btn btn-success mb-1">Change</button>
+                        </div> 
+                        <div class="form-group">
+                            <label>Captcha</label>
+                            <input type="text" @bind="TypedCaptcha" class="form-control" placeholder="Enter captcha">
+                        </div>
+                        <div class="mt-4">
+                            <button type="button" @onclick="DaftarUser" class="btn btn-outline-primary btn-block btn-lg">Sign Up</button>
+                        </div>
+                    </div>
+                    <div class="text-center mt-5">
+                        <p class="light-gray">Already have an Account? <a href="login">Sign In</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div class="login-main-right bg-white p-5 mt-5 mb-5">
+                    <div class="owl-carousel owl-carousel-login">
+                        <div class="item">
+                            <div class="carousel-login-card text-center">
+                                <img src="img/login.png" class="img-fluid" alt="LOGO">
+                                <h5 class="mt-5 mb-3">​Watch videos offline</h5>
+                                <p class="mb-4">when an unknown printer took a galley of type and scrambled<br> it to make a type specimen book. It has survived not <br>only five centuries</p>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="carousel-login-card text-center">
+                                <img src="img/login.png" class="img-fluid" alt="LOGO">
+                                <h5 class="mt-5 mb-3">Download videos effortlessly</h5>
+                                <p class="mb-4">when an unknown printer took a galley of type and scrambled<br> it to make a type specimen book. It has survived not <br>only five centuries</p>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <div class="carousel-login-card text-center">
+                                <img src="img/login.png" class="img-fluid" alt="LOGO">
+                                <h5 class="mt-5 mb-3">Create GIFs</h5>
+                                <p class="mb-4">when an unknown printer took a galley of type and scrambled<br> it to make a type specimen book. It has survived not <br>only five centuries</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@code {
+    public string CaptchaImage { get; set; }
+    public string Answer { get; set; }
+    public string TypedCaptcha { get; set; }
+
+    UserProfile DataUser = new UserProfile();
+    string RetypePass;
+    string KodePengurus;
+    string ErrorMsg = string.Empty;
+    bool RegisterSuccess = false;
+
+    void NotAvailable()
+    {
+        toastService.ShowWarning("Feature is not available yet");
+    }
+
+   
+
+    void GenerateCaptcha()
+    {
+        Random oRandom = new Random();
+        int iNumber = oRandom.Next(1000, 9999);
+        Answer = iNumber.ToString();
+        var temp = CaptchaGenerator.GetCaptcha(Answer, 158, 70);
+        string base64String = Convert.ToBase64String(temp, 0, temp.Length);
+        CaptchaImage = "data:image/png;base64," + base64String;
+    }
+   
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(CaptchaImage))
+            GenerateCaptcha();
+    }
+    async Task DaftarUser()
+    {
+        bool isPengurus = false;
+        ErrorMsg = "";
+        UserProfileService svc = new UserProfileService();
+        if (string.IsNullOrEmpty(TypedCaptcha))
+        {
+            ErrorMsg += "Tolong isi Captcha. ";
+        }
+        if (Answer != TypedCaptcha)
+        {
+            ErrorMsg += "Captcha tidak valid. ";
+        }
+        if (string.IsNullOrEmpty(DataUser.Email))
+        {
+            ErrorMsg += "Tolong di isi email. ";
+
+        }
+        if (!LayarTancep.Tools.FormValidation.IsValidEmail(DataUser.Email))
+        {
+            ErrorMsg += "Format email tidak valid. ";
+
+        }
+        if (string.IsNullOrEmpty(DataUser.Password))
+        {
+            ErrorMsg += "Tolong di isi password. ";
+
+        }
+        if (string.IsNullOrEmpty(DataUser.Phone))
+        {
+            ErrorMsg += "Tolong di isi no hp. ";
+
+        }
+        if (string.IsNullOrEmpty(DataUser.FirstName))
+        {
+            ErrorMsg += "Tolong di isi nama depan. ";
+
+        }
+        if (string.IsNullOrEmpty(DataUser.LastName))
+        {
+            ErrorMsg += "Tolong di isi nama belakang. ";
+
+        }
+        if (string.IsNullOrEmpty(DataUser.Alamat))
+        {
+            ErrorMsg += "Tolong di isi alamat. ";
+
+        }
+        if (DataUser.Password != RetypePass)
+        {
+            ErrorMsg += "Password tidak sesuai dengan ulang password. ";
+
+        }
+
+        DataUser.Username = DataUser.Email;
+
+        if (svc.IsUserExists(DataUser.Username))
+        {
+            ErrorMsg += "User sudah terdaftar sebelumnya, gunakan email lain. ";
+
+        }
+
+
+        if (ErrorMsg.Length > 0)
+        {
+            toastService.ShowWarning(ErrorMsg, "Perhatian");
+            return;
+        }
+        var enc = new Encryption();
+        DataUser.FullName = $"{DataUser.FirstName} {DataUser.LastName}";
+
+
+        DataUser.Role = isPengurus ? Roles.Pengurus : Roles.User;
+        DataUser.Password = enc.Encrypt(DataUser.Password);
+        DataUser.CreatedDate = DateHelper.GetLocalTimeNow();
+        if (svc.InsertData(DataUser))
+        {
+            var msg = "Anda telah terdaftar di LayarTancep, nuhun";
+            await SmsService.SendSms(msg, DataUser.Phone);
+            await MailService.PostmarkSendEmail("Telah Teregister di LayarTancep", msg, DataUser.Email);
+            RegisterSuccess = true;
+            toastService.ShowSuccess("User berhasil di daftarkan.", "Info");
+            NavMgr.NavigateTo("/login");
+
+        }
+    }
+}

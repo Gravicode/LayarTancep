@@ -1,5 +1,6 @@
 ﻿using GemBox.Document;
 using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.Hosting;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.Design;
@@ -57,7 +58,204 @@ namespace LayarTancep.Models
     }
     #endregion
 
+    [Table("channel_view")]
+    public class ChannelView
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        //user
+        [ForeignKey(nameof(User)), Column(Order = 0)]
+        public long UserId { get; set; }
+        public UserProfile User { set; get; }
+        public string UserName { set; get; }
 
+        [ForeignKey(nameof(Channel)), Column(Order = 1)]
+        public long ChannelId { get; set; }
+        public Channel Channel { set; get; }
+        public DateTime CreatedDate { set; get; }
+    }
+
+    [Table("channel_notification")]
+    public class ChannelNotification
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        //user
+        [ForeignKey(nameof(User)), Column(Order = 0)]
+        public long UserId { get; set; }
+        public UserProfile User { set; get; }
+        public string UserName { set; get; }
+
+        [ForeignKey(nameof(Channel)), Column(Order = 1)]
+        public long ChannelId { get; set; }
+        public Channel Channel { set; get; }
+        public DateTime CreatedDate { set; get; }
+    }
+
+
+    [Table("channel")]
+    public class Channel
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        public string Name { get; set; }
+        public string? Desc { get; set; }
+        public string Category { get; set; }
+        public string? Facebook { get; set; }
+        public string? Twitter { get; set; }
+        public string? Google { get; set; }
+        public DateTime CreatedDate { get; set; }
+
+        [ForeignKey(nameof(User)), Column(Order = 0)]
+        public long UserId { get; set; }
+        public UserProfile User { set; get; }
+        public string UserName { set; get; }
+
+        public ICollection<ChannelView> ChannelViews { get; set; }
+        public ICollection<Subscribe> Subscribers { get; set; }
+        public ICollection<ChannelNotification> ChannelNotifications { get; set; }
+        public ICollection<Post> Posts { get; set; }
+
+    }
+
+    [Table("trending")]
+    public class Trending
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        public string Hashtag { set; get; }
+        public long Count { get; set; }
+        public DateTime CreatedDate { set; get; }
+        public string? Location { set; get; }
+        public double? Longitude { get; set; }
+        public double? Latitude { get; set; }
+    }
+
+    [Table("subscribe")]
+    public class Subscribe
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        //user
+        [ForeignKey(nameof(User)), Column(Order = 0)]
+        public long UserId { get; set; }
+        public UserProfile User { set; get; }
+        public string UserName { set; get; }   
+
+        [ForeignKey(nameof(Channel)), Column(Order = 1)]
+        public long ChannelId { get; set; }
+        public Channel Channel { set; get; }
+        public DateTime SubscribeDate { set; get; }
+    }
+
+
+    [Table("postlike")]
+    public class PostLike
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        public Post Post { set; get; }
+        [ForeignKey("Post")]
+        public long PostId { set; get; }
+        [ForeignKey("UserProfile")]
+        public long LikedByUserId { set; get; }
+        public string LikedByUserName { set; get; }
+        public UserProfile LikedByUser { set; get; }
+        public DateTime CreatedDate { set; get; }
+    }
+
+    [Table("postview")]
+    public class PostView
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        public Post Post { set; get; }
+        [ForeignKey("Post")]
+        public long PostId { set; get; }
+        [ForeignKey("UserProfile")]
+        public long UserId { set; get; }
+        public string UserName { set; get; }
+        public UserProfile User { set; get; }
+        public DateTime CreatedDate { set; get; }
+    }
+
+    [Table("postcomment")]
+    public class PostComment
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        public string Comment { set; get; }
+        public Post Post { set; get; }
+        [ForeignKey("Post")]
+        public long PostId { set; get; }
+        [ForeignKey("UserProfile")]
+        public long UserId { set; get; }
+        public string Username { set; get; }
+        public DateTime CreatedDate { set; get; }
+        public UserProfile User { set; get; }
+        public ICollection<CommentLike> CommentLikes { get; set; }
+
+        public string CommentLike { get; set; }
+        public string CommentUnlike { get; set; }
+
+    }
+    [Table("commentlike")]
+    public class CommentLike
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        public PostComment Comment { set; get; }
+        [ForeignKey("Comment")]
+        public long CommentId { set; get; }
+        [ForeignKey("UserProfile")]
+        public long LikedByUserId { set; get; }
+        public string LikedByUserName { set; get; }
+        public UserProfile LikedByUser { set; get; }
+        public DateTime CreatedDate { set; get; }
+    }
+
+    [Table("post")]
+    public class Post
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        [ForeignKey("UserProfile")]
+        public long UserId { set; get; }
+        public string UserName { set; get; }
+        public DateTime CreatedDate { set; get; }
+        public string Title { set; get; }
+        public string? About { set; get; }
+        public string? Tag { set; get; }
+        public string? Category { set; get; }
+        public string? Privacy { set; get; }
+        public string? License { set; get; }
+        public string? Language { set; get; }
+        public string? Mentions { set; get; }
+        public string? VideoUrls { set; get; }
+        public string? ImageUrls { set; get; }
+        public string? Hashtags { set; get; }
+        public TimeSpan? Duration { set; get; }
+
+        [ForeignKey(nameof(Channel)), Column(Order = 1)]
+        public long ChannelId { get; set; }
+        public Channel Channel { set; get; }
+        public UserProfile User { get; set; }
+
+        public ICollection<PostLike> PostLikes { get; set; }
+        public ICollection<PostView> PostViews { get; set; }
+        public ICollection<PostComment> PostComments { get; set; }
+        public ICollection<CommentLike> CommentLikes { get; set; }
+    }
 
     [Table("notification")]
     public class Notification
@@ -123,11 +321,14 @@ namespace LayarTancep.Models
        
         public string? FBUrl { set; get; }
         public string? TwitterUrl { set; get; }
-        public string? GithubUrl { set; get; }
         public string? InstagramUrl { set; get; }
-        public string? LinkedIdUrl { set; get; }
 
-
+        public ICollection<Channel> Channels { get; set; }
+        public ICollection<PostLike> PostLikes { get; set; }
+        public ICollection<PostComment> PostComments { get; set; }
+        public ICollection<Post> Posts { get; set; }
+        public ICollection<ChannelNotification> ChannelNotifications { get; set; }
+        public ICollection<ChannelView> ChannelViews { get; set; }
     }
 
     [Table("contact")]
@@ -138,8 +339,8 @@ namespace LayarTancep.Models
         public long Id { get; set; }
 
         public string FullName { set; get; }
+        public string Phone { set; get; }
         public string Email { set; get; }
-        public string Subject { set; get; }
         public string Message { set; get; }
         public DateTime CreatedDate { set; get; }
         public string ReplyMessage { set; get; }

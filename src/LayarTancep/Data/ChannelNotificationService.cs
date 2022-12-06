@@ -8,47 +8,47 @@ using System.Threading.Tasks;
 
 namespace LayarTancep.Data
 {
-    public class ContactService : ICrud<Contact>
+    public class ChannelNotificationService : ICrud<ChannelNotification>
     {
         LayarTancepDB db;
 
-        public ContactService()
+        public ChannelNotificationService()
         {
             if (db == null) db = new LayarTancepDB();
 
         }
         public bool DeleteData(object Id)
         {
-            var selData = (db.Contacts.Where(x => x.Id == (long)Id).FirstOrDefault());
-            db.Contacts.Remove(selData);
+            var selData = (db.ChannelNotifications.Where(x => x.Id == (long)Id).FirstOrDefault());
+            db.ChannelNotifications.Remove(selData);
             db.SaveChanges();
             return true;
         }
 
-        public List<Contact> FindByKeyword(string Keyword)
+        public List<ChannelNotification> FindByKeyword(string Keyword)
         {
-            var data = from x in db.Contacts
-                       where x.Message.Contains(Keyword)
+            var data = from x in db.ChannelNotifications.Include(c=>c.Channel)
+                       where x.Channel.Name.Contains(Keyword)
                        select x;
             return data.ToList();
         }
 
-        public List<Contact> GetAllData()
+        public List<ChannelNotification> GetAllData()
         {
-            return db.Contacts.OrderBy(x => x.Id).ToList();
+            return db.ChannelNotifications.OrderBy(x => x.Id).ToList();
         }
 
-        public Contact GetDataById(object Id)
+        public ChannelNotification GetDataById(object Id)
         {
-            return db.Contacts.Where(x => x.Id == (long)Id).FirstOrDefault();
+            return db.ChannelNotifications.Where(x => x.Id == (long)Id).FirstOrDefault();
         }
 
 
-        public bool InsertData(Contact data)
+        public bool InsertData(ChannelNotification data)
         {
             try
             {
-                db.Contacts.Add(data);
+                db.ChannelNotifications.Add(data);
                 db.SaveChanges();
                 return true;
             }
@@ -62,7 +62,7 @@ namespace LayarTancep.Data
 
 
 
-        public bool UpdateData(Contact data)
+        public bool UpdateData(ChannelNotification data)
         {
             try
             {
@@ -91,7 +91,7 @@ namespace LayarTancep.Data
 
         public long GetLastId()
         {
-            return db.Contacts.Max(x => x.Id);
+            return db.ChannelNotifications.Max(x => x.Id);
         }
     }
 

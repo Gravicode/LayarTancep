@@ -8,47 +8,47 @@ using System.Threading.Tasks;
 
 namespace LayarTancep.Data
 {
-    public class ContactService : ICrud<Contact>
+    public class TrendingService : ICrud<Trending>
     {
         LayarTancepDB db;
 
-        public ContactService()
+        public TrendingService()
         {
             if (db == null) db = new LayarTancepDB();
 
         }
         public bool DeleteData(object Id)
         {
-            var selData = (db.Contacts.Where(x => x.Id == (long)Id).FirstOrDefault());
-            db.Contacts.Remove(selData);
+            var selData = (db.Trendings.Where(x => x.Id == (long)Id).FirstOrDefault());
+            db.Trendings.Remove(selData);
             db.SaveChanges();
             return true;
         }
 
-        public List<Contact> FindByKeyword(string Keyword)
+        public List<Trending> FindByKeyword(string Keyword)
         {
-            var data = from x in db.Contacts
-                       where x.Message.Contains(Keyword)
+            var data = from x in db.Trendings
+                       where x.Hashtag.Contains(Keyword)
                        select x;
             return data.ToList();
         }
 
-        public List<Contact> GetAllData()
+        public List<Trending> GetAllData()
         {
-            return db.Contacts.OrderBy(x => x.Id).ToList();
+            return db.Trendings.OrderBy(x => x.Id).ToList();
         }
 
-        public Contact GetDataById(object Id)
+        public Trending GetDataById(object Id)
         {
-            return db.Contacts.Where(x => x.Id == (long)Id).FirstOrDefault();
+            return db.Trendings.Where(x => x.Id == (long)Id).FirstOrDefault();
         }
 
 
-        public bool InsertData(Contact data)
+        public bool InsertData(Trending data)
         {
             try
             {
-                db.Contacts.Add(data);
+                db.Trendings.Add(data);
                 db.SaveChanges();
                 return true;
             }
@@ -62,7 +62,7 @@ namespace LayarTancep.Data
 
 
 
-        public bool UpdateData(Contact data)
+        public bool UpdateData(Trending data)
         {
             try
             {
@@ -91,7 +91,7 @@ namespace LayarTancep.Data
 
         public long GetLastId()
         {
-            return db.Contacts.Max(x => x.Id);
+            return db.Trendings.Max(x => x.Id);
         }
     }
 

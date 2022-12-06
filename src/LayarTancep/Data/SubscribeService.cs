@@ -8,47 +8,47 @@ using System.Threading.Tasks;
 
 namespace LayarTancep.Data
 {
-    public class ContactService : ICrud<Contact>
+    public class SubscribeService : ICrud<Subscribe>
     {
         LayarTancepDB db;
 
-        public ContactService()
+        public SubscribeService()
         {
             if (db == null) db = new LayarTancepDB();
 
         }
         public bool DeleteData(object Id)
         {
-            var selData = (db.Contacts.Where(x => x.Id == (long)Id).FirstOrDefault());
-            db.Contacts.Remove(selData);
+            var selData = (db.Subscribes.Where(x => x.Id == (long)Id).FirstOrDefault());
+            db.Subscribes.Remove(selData);
             db.SaveChanges();
             return true;
         }
 
-        public List<Contact> FindByKeyword(string Keyword)
+        public List<Subscribe> FindByKeyword(string Keyword)
         {
-            var data = from x in db.Contacts
-                       where x.Message.Contains(Keyword)
+            var data = from x in db.Subscribes.Include(c=>c.Channel)
+                       where x.Channel.Name.Contains(Keyword)
                        select x;
             return data.ToList();
         }
 
-        public List<Contact> GetAllData()
+        public List<Subscribe> GetAllData()
         {
-            return db.Contacts.OrderBy(x => x.Id).ToList();
+            return db.Subscribes.OrderBy(x => x.Id).ToList();
         }
 
-        public Contact GetDataById(object Id)
+        public Subscribe GetDataById(object Id)
         {
-            return db.Contacts.Where(x => x.Id == (long)Id).FirstOrDefault();
+            return db.Subscribes.Where(x => x.Id == (long)Id).FirstOrDefault();
         }
 
 
-        public bool InsertData(Contact data)
+        public bool InsertData(Subscribe data)
         {
             try
             {
-                db.Contacts.Add(data);
+                db.Subscribes.Add(data);
                 db.SaveChanges();
                 return true;
             }
@@ -62,7 +62,7 @@ namespace LayarTancep.Data
 
 
 
-        public bool UpdateData(Contact data)
+        public bool UpdateData(Subscribe data)
         {
             try
             {
@@ -91,7 +91,7 @@ namespace LayarTancep.Data
 
         public long GetLastId()
         {
-            return db.Contacts.Max(x => x.Id);
+            return db.Subscribes.Max(x => x.Id);
         }
     }
 

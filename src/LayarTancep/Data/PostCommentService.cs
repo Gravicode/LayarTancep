@@ -8,47 +8,47 @@ using System.Threading.Tasks;
 
 namespace LayarTancep.Data
 {
-    public class ContactService : ICrud<Contact>
+    public class PostCommentService : ICrud<PostComment>
     {
         LayarTancepDB db;
 
-        public ContactService()
+        public PostCommentService()
         {
             if (db == null) db = new LayarTancepDB();
 
         }
         public bool DeleteData(object Id)
         {
-            var selData = (db.Contacts.Where(x => x.Id == (long)Id).FirstOrDefault());
-            db.Contacts.Remove(selData);
+            var selData = (db.PostComments.Where(x => x.Id == (long)Id).FirstOrDefault());
+            db.PostComments.Remove(selData);
             db.SaveChanges();
             return true;
         }
 
-        public List<Contact> FindByKeyword(string Keyword)
+        public List<PostComment> FindByKeyword(string Keyword)
         {
-            var data = from x in db.Contacts
-                       where x.Message.Contains(Keyword)
+            var data = from x in db.PostComments.Include(c=>c.Post)
+                       where x.Post.Title.Contains(Keyword)
                        select x;
             return data.ToList();
         }
 
-        public List<Contact> GetAllData()
+        public List<PostComment> GetAllData()
         {
-            return db.Contacts.OrderBy(x => x.Id).ToList();
+            return db.PostComments.OrderBy(x => x.Id).ToList();
         }
 
-        public Contact GetDataById(object Id)
+        public PostComment GetDataById(object Id)
         {
-            return db.Contacts.Where(x => x.Id == (long)Id).FirstOrDefault();
+            return db.PostComments.Where(x => x.Id == (long)Id).FirstOrDefault();
         }
 
 
-        public bool InsertData(Contact data)
+        public bool InsertData(PostComment data)
         {
             try
             {
-                db.Contacts.Add(data);
+                db.PostComments.Add(data);
                 db.SaveChanges();
                 return true;
             }
@@ -62,7 +62,7 @@ namespace LayarTancep.Data
 
 
 
-        public bool UpdateData(Contact data)
+        public bool UpdateData(PostComment data)
         {
             try
             {
@@ -91,7 +91,7 @@ namespace LayarTancep.Data
 
         public long GetLastId()
         {
-            return db.Contacts.Max(x => x.Id);
+            return db.PostComments.Max(x => x.Id);
         }
     }
 

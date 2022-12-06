@@ -8,47 +8,47 @@ using System.Threading.Tasks;
 
 namespace LayarTancep.Data
 {
-    public class ContactService : ICrud<Contact>
+    public class PostViewService : ICrud<PostView>
     {
         LayarTancepDB db;
 
-        public ContactService()
+        public PostViewService()
         {
             if (db == null) db = new LayarTancepDB();
 
         }
         public bool DeleteData(object Id)
         {
-            var selData = (db.Contacts.Where(x => x.Id == (long)Id).FirstOrDefault());
-            db.Contacts.Remove(selData);
+            var selData = (db.PostViews.Where(x => x.Id == (long)Id).FirstOrDefault());
+            db.PostViews.Remove(selData);
             db.SaveChanges();
             return true;
         }
 
-        public List<Contact> FindByKeyword(string Keyword)
+        public List<PostView> FindByKeyword(string Keyword)
         {
-            var data = from x in db.Contacts
-                       where x.Message.Contains(Keyword)
+            var data = from x in db.PostViews.Include(c=>c.Post)
+                       where x.Post.Title.Contains(Keyword)
                        select x;
             return data.ToList();
         }
 
-        public List<Contact> GetAllData()
+        public List<PostView> GetAllData()
         {
-            return db.Contacts.OrderBy(x => x.Id).ToList();
+            return db.PostViews.OrderBy(x => x.Id).ToList();
         }
 
-        public Contact GetDataById(object Id)
+        public PostView GetDataById(object Id)
         {
-            return db.Contacts.Where(x => x.Id == (long)Id).FirstOrDefault();
+            return db.PostViews.Where(x => x.Id == (long)Id).FirstOrDefault();
         }
 
 
-        public bool InsertData(Contact data)
+        public bool InsertData(PostView data)
         {
             try
             {
-                db.Contacts.Add(data);
+                db.PostViews.Add(data);
                 db.SaveChanges();
                 return true;
             }
@@ -62,7 +62,7 @@ namespace LayarTancep.Data
 
 
 
-        public bool UpdateData(Contact data)
+        public bool UpdateData(PostView data)
         {
             try
             {
@@ -91,7 +91,7 @@ namespace LayarTancep.Data
 
         public long GetLastId()
         {
-            return db.Contacts.Max(x => x.Id);
+            return db.PostViews.Max(x => x.Id);
         }
     }
 

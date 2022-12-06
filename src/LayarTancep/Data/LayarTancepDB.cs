@@ -20,6 +20,16 @@ namespace LayarTancep.Data
         {
         }
 
+        public DbSet<ChannelView> ChannelViews { get; set; }     
+        public DbSet<ChannelNotification> ChannelNotifications { get; set; }     
+        public DbSet<Channel> Channels { get; set; }     
+        public DbSet<Trending> Trendings { get; set; }     
+        public DbSet<Subscribe> Subscribes { get; set; }     
+        public DbSet<PostLike> PostLikes { get; set; }     
+        public DbSet<PostView> PostViews { get; set; }     
+        public DbSet<PostComment> PostComments { get; set; }     
+        public DbSet<CommentLike> CommentLikes { get; set; }     
+        public DbSet<Post> Posts { get; set; }     
         public DbSet<UserProfile> UserProfiles { get; set; }     
        
         public DbSet<Notification> Notifications { get; set; }      

@@ -44,8 +44,17 @@ builder.Services.AddTransient<AzureBlobHelper>();
 builder.Services.AddTransient<LogService>();
 builder.Services.AddTransient<UserProfileService>();
 builder.Services.AddTransient<ContactService>();
-
 builder.Services.AddTransient<NotificationService>();
+builder.Services.AddTransient<ChannelViewService>();
+builder.Services.AddTransient<ChannelNotificationService>();
+builder.Services.AddTransient<ChannelService>();
+builder.Services.AddTransient<TrendingService>();
+builder.Services.AddTransient<SubscribeService>();
+builder.Services.AddTransient<PostLikeService>();
+builder.Services.AddTransient<PostViewService>();
+builder.Services.AddTransient<PostCommentService>();
+builder.Services.AddTransient<CommentLikeService>();
+builder.Services.AddTransient<PostService>();
 
 builder.Services.AddCors(options =>
 {

@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject IJSRuntime IJS
 @using Blazored.Toast.Configuration
 @page "/auth/{Slug}"
 
@@ -30,5 +31,13 @@ ErrorIconClass="fa fa-bug" />
             //Slug = slug?.ToString();
         }
         */
+    }
+    protected override void OnAfterRender(bool firstRender)
+    {
+
+        if (firstRender)
+        {
+            IJS.InvokeVoidAsync("InitJs");
+        }
     }
 }

@@ -3,6 +3,11 @@
 @inject NavigationManager NavMgr
 @inject IToastService toastService
 
+@using LayarTancep.Tools
+@using LayarTancep.Models
+@using LayarTancep.Data
+@inject AzureBlobHelper AzureBlobHelper
+
 <div class="container-fluid upload-details">
     <div class="row">
         <div class="col-lg-12">
@@ -16,13 +21,13 @@
             <div class="col-sm-6">
                 <div class="form-group">
                     <label class="control-label">First Name <span class="required">*</span></label>
-                    <input class="form-control border-form-control" value="" placeholder="Gurdeep" type="text">
+                    <input class="form-control border-form-control" @bind="DataUser.FirstName" placeholder="Gurdeep" type="text">
                 </div>
             </div>
             <div class="col-sm-6">
                 <div class="form-group">
                     <label class="control-label">Last Name <span class="required">*</span></label>
-                    <input class="form-control border-form-control" value="" placeholder="Osahan" type="text">
+                    <input class="form-control border-form-control" @bind="DataUser.LastName" placeholder="Osahan" type="text">
                 </div>
             </div>
         </div>
@@ -30,13 +35,13 @@
             <div class="col-sm-6">
                 <div class="form-group">
                     <label class="control-label">Phone <span class="required">*</span></label>
-                    <input class="form-control border-form-control" value="" placeholder="123 456 7890" type="number">
+                    <input class="form-control border-form-control" @bind="DataUser.Phone" placeholder="0818-..." type="tel">
                 </div>
             </div>
             <div class="col-sm-6">
                 <div class="form-group">
                     <label class="control-label">Email Address <span class="required">*</span></label>
-                    <input class="form-control border-form-control " value="" placeholder="iamosahan@gmail.com" disabled="" type="email">
+                    <input class="form-control border-form-control " @bind="DataUser.Email" placeholder="iamosahan@gmail.com" disabled="" type="email">
                 </div>
             </div>
         </div>
@@ -44,7 +49,7 @@
             <div class="col-sm-6">
                 <div class="form-group">
                     <label class="control-label">Country <span class="required">*</span></label>
-                    <select class="custom-select">
+                    <select @bind="DataUser.Country" class="custom-select">
                         <option value="">Select Country</option>
                         <option value="AF">Afghanistan</option>
                         <option value="AX">Åland Islands</option>
@@ -301,13 +306,7 @@
             <div class="col-sm-6">
                 <div class="form-group">
                     <label class="control-label">City <span class="required">*</span></label>
-                    <select class="custom-select">
-                        <option value="">Select City</option>
-                        <option value="AF">Alaska</option>
-                        <option value="AX">New Hampshire</option>
-                        <option value="AL">Oregon</option>
-                        <option value="DZ">Toronto</option>
-                    </select>
+                    <input class="form-control border-form-control" @bind="DataUser.City" placeholder="Jakarta" type="text">
                 </div>
             </div>
         </div>
@@ -315,19 +314,28 @@
             <div class="col-sm-6">
                 <div class="form-group">
                     <label class="control-label">Zip Code <span class="required">*</span></label>
-                    <input class="form-control border-form-control" value="" placeholder="123456" type="number">
+                    <input class="form-control border-form-control" @bind="DataUser.ZipCode" placeholder="16710" type="text">
                 </div>
             </div>
             <div class="col-sm-6">
                 <div class="form-group">
                     <label class="control-label">State <span class="required">*</span></label>
-                    <select class="custom-select">
-                        <option value="">Select State</option>
-                        <option value="AF">California</option>
-                        <option value="AX">Florida</option>
-                        <option value="AL">Georgia</option>
-                        <option value="DZ">Idaho</option>
-                    </select>
+                    <input class="form-control border-form-control" @bind="DataUser.State" placeholder="Jawa Barat" type="text">
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="control-label">New Password <span class="required">*</span></label>
+                    <input class="form-control border-form-control" @bind="DataUser.Password" placeholder="***" type="password">
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="control-label">Retype Password <span class="required">*</span></label>
+                    <input class="form-control border-form-control" @bind="RetypePass" placeholder="***" type="password">
                 </div>
             </div>
         </div>
@@ -335,18 +343,139 @@
             <div class="col-sm-12">
                 <div class="form-group">
                     <label class="control-label">Address <span class="required">*</span></label>
-                    <textarea class="form-control border-form-control"></textarea>
+                    <textarea @bind="DataUser.Alamat" class="form-control border-form-control"></textarea>
                 </div>
+            </div>
+        </div> 
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="control-label">Photo Profile <span class="required">*</span></label>
+                    <InputFile id="fileInput1" OnChange="UploadFiles" accept="image/*" />
+                    @if (!string.IsNullOrEmpty(DataUser.PicUrl))
+                    {
+                        <div class="alert alert-info">Photo has been selected</div>
+                    }
+                    else{
+                         <div class="alert alert-warning">Please upload profile image</div>
+                        
+                        }
+                    </div>
             </div>
         </div>
         <div class="row">
             <div class="col-sm-12 text-right">
-                <button type="button" class="btn btn-danger border-none"> Cencel </button>
-                <button type="button" class="btn btn-success border-none"> Save Changes </button>
+                <button type="button" @onclick="Kembali" class="btn btn-danger border-none"> Cancel </button>
+                <button type="button" @onclick="Simpan" class="btn btn-success border-none"> Save Changes </button>
             </div>
         </div>
     </form>
 </div>
 @code {
+    string GenderStr;
+    UserProfile DataUser = new UserProfile();
+    UserProfileService service;
+    string RetypePass;
+    string ErrorMsg = string.Empty;
+    bool RegisterSuccess = false;
+    Encryption enc;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    string UserName;
+    private void OnChange(ChangeEventArgs args)
+    {
+        GenderStr = args.Value.ToString();
+    }
+    async Task PrepareUpload()
+    {
+        await IJS.InvokeVoidAsync("OpenFileUpload", "fileInput1");
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        enc = new Encryption();
+        if (service == null) service = new UserProfileService();
+        var user = (await authenticationStateTask).User;
 
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+            DataUser = service.GetItemByUsername(UserName);
+            DataUser.Password = enc.Decrypt(DataUser.Password);
+        }
+
+
+    }
+    void Simpan()
+    {
+        ErrorMsg = "";
+
+
+        if (string.IsNullOrEmpty(DataUser.Password))
+        {
+            ErrorMsg += "Tolong di isi password. ";
+
+        }
+        if (string.IsNullOrEmpty(DataUser.Phone))
+        {
+            ErrorMsg += "Tolong di isi no hp. ";
+
+        }
+        if (string.IsNullOrEmpty(DataUser.FirstName))
+        {
+            ErrorMsg += "Tolong di isi nama depan. ";
+
+        }
+        if (string.IsNullOrEmpty(DataUser.LastName))
+        {
+            ErrorMsg += "Tolong di isi nama belakang. ";
+
+        }
+
+        if (string.IsNullOrEmpty(DataUser.Alamat))
+        {
+            ErrorMsg += "Tolong di isi alamat. ";
+
+        }
+        if (DataUser.Password != RetypePass)
+        {
+            ErrorMsg += "Password tidak sesuai dengan ulang password. ";
+
+        }
+
+        if (ErrorMsg.Length > 0)
+        {
+            toastService.ShowWarning(ErrorMsg, "Perhatian");
+            return;
+        }
+        if (GenderStr != null)
+            DataUser.Gender = GenderStr[0];
+        DataUser.Password = enc.Encrypt(DataUser.Password);
+        if (service.UpdateData(DataUser))
+        {
+            toastService.ShowSuccess("Profile Anda sudah berhasil di update. Nuhun", "Info");
+        }
+    }
+
+    void Kembali()
+    {
+        NavMgr.NavigateTo("/");
+    }
+    private async Task UploadFiles(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var ms = new MemoryStream();
+            await file.OpenReadStream(AppConstants.MaxAllowedFileSize).CopyToAsync(ms);
+            var data = SKiaImageHelper.Resize(ms.ToArray(), 250, 250);
+            var bytes = data.FileContents;
+            string newName = string.Empty;
+
+            newName = $"profile_{(string.IsNullOrEmpty(DataUser.Username) ? "rojul" : DataUser.Username)}_{DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss")}_{file.Name}";
+            var FileUrl = $"{AppConstants.UploadUrlPrefix}{newName}";
+            await AzureBlobHelper.UploadFile(newName, bytes);
+            DataUser.PicUrl = FileUrl;
+
+        }
+    }
 }

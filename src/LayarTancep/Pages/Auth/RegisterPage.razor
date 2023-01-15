@@ -30,7 +30,11 @@
                         </div>
                         <div class="form-group">
                             <label>Mobile number</label>
-                            <input type="text" class="form-control" @bind="DataUser.Phone" placeholder="Enter mobile number">
+                            <input type="tel" class="form-control" @bind="DataUser.Phone" placeholder="Enter mobile number">
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <input type="text" class="form-control" @bind="DataUser.Alamat" placeholder="Enter your address">
                         </div>
                         <div class="form-group">
                             <label>Password</label>
@@ -53,7 +57,7 @@
                         </div>
                     </div>
                     <div class="text-center mt-5">
-                        <p class="light-gray">Already have an Account? <a href="login">Sign In</a></p>
+                        <p class="light-gray">Already have an Account? <a href="sign-in">Sign In</a></p>
                     </div>
                 </div>
             </div>
@@ -205,7 +209,7 @@
             await MailService.PostmarkSendEmail("Telah Teregister di LayarTancep", msg, DataUser.Email);
             RegisterSuccess = true;
             toastService.ShowSuccess("User berhasil di daftarkan.", "Info");
-            NavMgr.NavigateTo("/login");
+            NavMgr.NavigateTo("/sign-in");
 
         }
     }

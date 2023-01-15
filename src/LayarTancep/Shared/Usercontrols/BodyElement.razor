@@ -1,7 +1,8 @@
 ﻿@inject IJSRuntime JSRuntime
 @code {
-    protected async override Task OnParametersSetAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+
         if (CssClass is { })
             await JSRuntime.InvokeVoidAsync("addCssClassToBody", CssClass);
 
@@ -10,6 +11,10 @@
 
         if (TextDirection is { })
             await JSRuntime.InvokeVoidAsync("setTextDirectionOfBody", TextDirection);
+    }
+    protected async override Task OnParametersSetAsync()
+    {
+       
     }
 
     [Parameter]

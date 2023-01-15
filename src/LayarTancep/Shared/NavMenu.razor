@@ -1,7 +1,9 @@
 ﻿@inject Blazored.LocalStorage.ILocalStorageService localStorage
-@inject IJSRuntime jsRuntime
+@inject IJSRuntime IJS
+@inject NavigationManager NavMgr
 @inject UserProfileService Userservice
-  
+@inject IToastService Toast
+@inject NotificationService NotificationSvc
 
 <nav class="navbar navbar-expand navbar-light bg-white static-top osahan-nav sticky-top">
     &nbsp;&nbsp;
@@ -12,9 +14,9 @@
     <!-- Navbar Search -->
     <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-5 my-2 my-md-0 osahan-navbar-search">
         <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search for...">
+            <input type="text" class="form-control" @bind="Keyword" @onkeyup="KeyUp" placeholder="Search for...">
             <div class="input-group-append">
-                <button class="btn btn-light" type="button">
+                <button class="btn btn-light" @onclick="Search" type="button">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
@@ -31,52 +33,106 @@
         <li class="nav-item dropdown no-arrow mx-1">
             <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-bell fa-fw"></i>
-                <span class="badge badge-danger">9+</span>
+                <span class="badge badge-danger">@(ListNotification == null ? 0 : ListNotification?.Count.ToString("n0"))</span>
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown">
-                <a class="dropdown-item" href="#"><i class="fas fa-fw fa-edit "></i> &nbsp; Action</a>
-                <a class="dropdown-item" href="#"><i class="fas fa-fw fa-headphones-alt "></i> &nbsp; Another action</a>
+                @if (ListNotification != null && ListNotification.Count > 0)
+                    foreach (var notif in ListNotification)
+                    {
+                        <a class="dropdown-item" href="@notif.LinkUrl"><i class="fas fa-fw fa-edit "></i> &nbsp; @($"{notif.CreatedDate.ToString("dd MMM, yyyy")} - {notif.Message}")</a>
+                    }
+                else
+                {
+                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-edit "></i> &nbsp; Empty</a>
+                }
+
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star "></i> &nbsp; Something else here</a>
+                <a class="dropdown-item" @onclick:preventDefault @onclick="ClearNotif" href="#"><i class="fas fa-fw fa-star "></i> &nbsp; Clear</a>
             </div>
         </li>
         <li class="nav-item dropdown no-arrow mx-1">
             <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-envelope fa-fw"></i>
-                <span class="badge badge-success">7</span>
+                <span class="badge badge-success">0</span>
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="messagesDropdown">
-                <a class="dropdown-item" href="#"><i class="fas fa-fw fa-edit "></i> &nbsp; Action</a>
-                <a class="dropdown-item" href="#"><i class="fas fa-fw fa-headphones-alt "></i> &nbsp; Another action</a>
+                <a class="dropdown-item" href="#"><i class="fas fa-fw fa-edit "></i> &nbsp; Empty</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star "></i> &nbsp; Something else here</a>
+                <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star "></i> &nbsp; Clear Message</a>
             </div>
         </li>
         <li class="nav-item dropdown no-arrow osahan-right-navbar-user">
             <a class="nav-link dropdown-toggle user-dropdown-link" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <img alt="Avatar" src="img/user.png">
-                Osahan
+                <img alt="Avatar" src="@(string.IsNullOrEmpty(SelUser?.PicUrl) ? "img/user.png":SelUser.PicUrl)">
+                @SelUser?.FullName
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                <a class="dropdown-item" href="account"><i class="fas fa-fw fa-user-circle"></i> &nbsp; My Account</a>
-                <a class="dropdown-item" href="subscriptions"><i class="fas fa-fw fa-video"></i> &nbsp; Subscriptions</a>
-                <a class="dropdown-item" href="settings"><i class="fas fa-fw fa-cog"></i> &nbsp; Settings</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal"><i class="fas fa-fw fa-sign-out-alt"></i> &nbsp; Logout</a>
+                <AuthorizeView>
+                    <Authorized>
+                        <a class="dropdown-item" href="account"><i class="fas fa-fw fa-user-circle"></i> &nbsp; My Account</a>
+                        <a class="dropdown-item" href="subscriptions"><i class="fas fa-fw fa-video"></i> &nbsp; Subscriptions</a>
+                        <a class="dropdown-item" href="settings"><i class="fas fa-fw fa-cog"></i> &nbsp; Settings</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal"><i class="fas fa-fw fa-sign-out-alt"></i> &nbsp; Logout</a>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a class="dropdown-item" href="sign-in"><i class="fas fa-fw fa-user-circle"></i> &nbsp; Login</a>
+                    </NotAuthorized>
+                </AuthorizeView>
             </div>
         </li>
     </ul>
 </nav>
 @code {
+    string Keyword = string.Empty;
     bool collapseNavMenu = true;
     bool HasLogin = true;
     string NavMenuCssClass => (collapseNavMenu ? "collapse" : "");
     string UserName { set; get; }
-     [CascadingParameter]
+    public UserProfile SelUser { get; set; }
+    public List<Notification> ListNotification { get; set; } = new();
+    [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
     void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+    private void KeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            Search();
+        }
+    }
+    async Task ClearNotif()
+    {
+        foreach (var item in ListNotification)
+        {
+            item.IsRead = true;
+
+        }
+        var res = NotificationSvc.UpdateDatas(ListNotification);
+        if (res)
+        {
+            Toast.ShowInfo("Notification is cleared.");
+            LoadData();
+        }
+    }
+    void Search()
+    {
+        if (!string.IsNullOrEmpty(Keyword))
+        {
+            NavMgr.NavigateTo($"/index/{Keyword}");
+        }
+        else
+        {
+            Toast.ShowWarning("Please type search keyword first.");
+        }
+    }
+
+    void LoadData()
+    {
+        ListNotification = NotificationSvc.GetAllData(UserName);
     }
 
     protected override async Task OnInitializedAsync()
@@ -87,16 +143,18 @@
         if (user.Identity.IsAuthenticated)
         {
             UserName = user.Identity.Name;
-            HasLogin = Userservice.GetUserRole(UserName)!=Roles.User;
+            HasLogin = Userservice.GetUserRole(UserName) != Roles.User;
+            SelUser = Userservice.GetItemByUsername(UserName);
+            LoadData();
         }
-        
+
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-           
+
 
         }
 

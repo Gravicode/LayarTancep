@@ -24,12 +24,16 @@
     </form>
     <!-- Navbar -->
     <ul class="navbar-nav ml-auto ml-md-0 osahan-right-navbar">
-        <li class="nav-item mx-1">
-            <a class="nav-link" href="upload">
-                <i class="fas fa-plus-circle fa-fw"></i>
-                Upload Video
-            </a>
-        </li>
+        <AuthorizeView>
+            <Authorized>
+                <li class="nav-item mx-1">
+                    <a class="nav-link" href="upload">
+                        <i class="fas fa-plus-circle fa-fw"></i>
+                        Upload Video
+                    </a>
+                </li>
+            </Authorized>
+        </AuthorizeView>
         <li class="nav-item dropdown no-arrow mx-1">
             <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-bell fa-fw"></i>

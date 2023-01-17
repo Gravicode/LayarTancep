@@ -9,6 +9,11 @@ using System.Reflection;
 namespace LayarTancep.Models
 {
     #region helpers model
+    public class FilterChannels
+    {
+        public const string TopRated = "TopRated";
+        public const string TopViewed = "TopViewed";
+    }
     public class StorageObject
     {
         public string Name { get; set; }

@@ -74,9 +74,17 @@ namespace LayarTancep.Data
             return db.Channels.OrderBy(x => x.Id).ToList();
         } 
         
-        public List<Channel> GetLatest(int Limit=100)
+        public List<Channel> GetLatest(string Filter, int Limit=100)
         {
-            return db.Channels.Include(c=>c.Subscribers).OrderByDescending(x => x.CreatedDate).Take(Limit).ToList();
+            if(Filter == FilterChannels.TopViewed)
+            {
+                return db.Channels.Include(c=>c.ChannelViews).Include(c => c.Subscribers).OrderByDescending(x=>x.ChannelViews.Count).ThenByDescending(x => x.CreatedDate).Take(Limit).ToList();
+            }
+            else
+            {
+                return db.Channels.Include(c => c.Subscribers).OrderByDescending(x => x.Subscribers.Count).ThenByDescending(x => x.CreatedDate).Take(Limit).ToList();
+            }
+          
         }
         public List<Channel> GetByUser(UserProfile user)
         {

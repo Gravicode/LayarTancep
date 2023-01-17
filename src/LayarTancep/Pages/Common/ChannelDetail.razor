@@ -1,0 +1,177 @@
+﻿@using LayarTancep.Models
+@using LayarTancep.Data
+@inject IJSRuntime jsRuntime
+@using System.IO
+@inject IToastService toastService
+@inject ChannelService service
+@inject UserProfileService UserSvc
+@inject AzureBlobHelper AzureBlobHelper
+
+
+<div class="modal" tabindex="-1" role="dialog" id="taskModal">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@CustomHeader</h5>
+
+
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@TaskObject" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+
+                    <div class="form-group">
+                        <label for="judul">Name</label>
+                        <input type="hidden" @bind-value="@TaskObject.Id" />
+                        <InputText id="judul" class="form-control" @bind-Value="@TaskObject.Name" />
+                        <ValidationMessage For="@(() => TaskObject.Name)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="kategori">Kategori</label>
+                        <select @bind="TaskObject.Category" id="kategori" class="custom-select">
+                            <option value="-">Pilih</option>
+                            <option value="Auto & Vehicle">Auto & Vehicle</option>
+                            <option value="Comedy">Comedy</option>
+                            <option value="Education">Education</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Film & Animation">Film & Animation</option>
+                            <option value="Gaming">Gaming</option>
+                            <option value="HowTo & Style">HowTo & Style</option>
+                            <option value="Music">Music</option>
+                            <option value="News & Politics">News & Politics</option>
+                            <option value="NonProfits & Activism">NonProfits & Activism</option>
+                            <option value="People & Blogs">People & Blogs</option>
+                            <option value="Pets & Animals">Pets & Animals</option>
+                            <option value="Science & Technology">Science & Technology</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Travel & Events">Travel & Events</option>
+
+                        </select>
+                        <ValidationMessage For="@(() => TaskObject.Category)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="desc">Deskripsi</label>
+                        <InputTextArea id="desc" class="form-control" @bind-Value="@TaskObject.Desc" />
+                        <ValidationMessage For="@(() => TaskObject.Desc)" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Facebook">Facebook</label>
+                        <InputText id="Facebook" class="form-control" @bind-Value="@TaskObject.Facebook" />
+                        <ValidationMessage For="@(() => TaskObject.Facebook)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Google">Google</label>
+                        <InputText id="Google" class="form-control" @bind-Value="@TaskObject.Google" />
+                        <ValidationMessage For="@(() => TaskObject.Google)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Twitter">Twitter</label>
+                        <InputText id="Twitter" class="form-control" @bind-Value="@TaskObject.Twitter" />
+                        <ValidationMessage For="@(() => TaskObject.Twitter)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Picture">Picture</label>
+                        <InputFile class="uploadButton-input" id="filePicChannel" accept="image/*" multiple OnChange="UploadFiles" />
+                        @if (string.IsNullOrEmpty(TaskObject.PicUrl))
+                        {
+                            <span class="alert alert-info">Pilih Gambar</span>
+                        }
+                        else
+                        {
+                            <span class="alert alert-success">Gambar sudah dipilih</span>
+                        }
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </EditForm>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    public UserProfile SelUser { get; set; }
+    string UserName { set; get; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    public string FileUrl { get; set; }
+    [Parameter]
+    public RenderFragment CustomHeader { get; set; }
+    [Parameter]
+    public Channel TaskObject { get; set; }
+    [Parameter]
+    public Action DataChanged { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+            SelUser = UserSvc.GetItemByUsername(UserName);
+
+        }
+
+    }
+    private async void HandleValidSubmit()
+    {
+
+
+        if (TaskObject.Id == 0)
+        {
+
+            service.InsertData(TaskObject);
+
+        }
+        else
+        {
+            service.UpdateData(TaskObject);
+        }
+
+        await CloseTaskModal();
+        DataChanged?.Invoke();
+    }
+
+
+
+    private async Task CloseTaskModal()
+    {
+        await jsRuntime.InvokeAsync<object>("CloseModal", "taskModal");
+    }
+    private async Task UploadFiles(InputFileChangeEventArgs e)
+    {
+        var fileurls = new List<string>();
+        foreach (var file in e.GetMultipleFiles(e.FileCount))
+        {
+
+            //var file = e.File;
+            if (file != null)
+            {
+                var ms = new MemoryStream();
+                await file.OpenReadStream().CopyToAsync(ms);
+                var bytes = ms.ToArray();
+                //var bytes = SKiaImageHelper.FixedSize(ms, 900, 500, false);
+                string newName = string.Empty;
+
+                newName = $"ChannelPic_{(string.IsNullOrEmpty(SelUser.Username) ? "rojul" : SelUser.Username)}_{DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss")}_{file.Name}";
+                var FileUrl = $"{AppConstants.UploadUrlPrefix}{newName}";
+                await AzureBlobHelper.UploadFile(newName, bytes);
+                fileurls.Add(FileUrl);
+
+            }
+            break;
+        }
+        TaskObject.PicUrl = string.Join(';', fileurls);
+    }
+
+}

@@ -68,12 +68,26 @@ namespace LayarTancep.Data
                        select x;
             return data.ToList();
         }
+        public List<ChannelCategoryCls> GetChannelCategory()
+        {
+            var datas =  db.Channels.ToList();
+            var results = from p in datas
+                          group p by p.Category into g
+                          select new  ChannelCategoryCls{ PicUrl= g?.First().PicUrl, Category = g.Key, Channels = g.ToList() };
+            return results.ToList();
 
+        }
         public List<Channel> GetAllData()
         {
             return db.Channels.OrderBy(x => x.Id).ToList();
-        } 
-        
+        }
+        public List<Channel> GetPopular(int Limit = 12)
+        {
+          
+                return db.Channels.Include(c => c.Subscribers).OrderByDescending(x => x.Subscribers.Count).ThenByDescending(x => x.ChannelViews.Count).ThenByDescending(x => x.CreatedDate).Take(Limit).ToList();
+            
+
+        }
         public List<Channel> GetLatest(string Filter, int Limit=100)
         {
             if(Filter == FilterChannels.TopViewed)
@@ -103,7 +117,7 @@ namespace LayarTancep.Data
 
         public Channel GetDataById(object Id)
         {
-            return db.Channels.Where(x => x.Id == (long)Id).FirstOrDefault();
+            return db.Channels.Include(x=>x.Subscribers).Include(c => c.Posts).Where(x => x.Id == (long)Id).FirstOrDefault();
         }
 
 

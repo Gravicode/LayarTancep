@@ -8,6 +8,17 @@
 
 <div class="container-fluid pb-0">
     <div class="video-block section-padding">
+        <AuthorizeView>
+            <Authorized>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="osahan-area text-center mt-3">
+                            <button @onclick="AddNewChannel" data-toggle="modal" data-target="#taskModal" class="btn btn-outline-primary">Buat Baru</button>
+                        </div>
+                    </div>
+                </div>
+            </Authorized>
+        </AuthorizeView>
         <div class="row">
             <div class="col-md-12">
                 <div class="main-title">
@@ -18,7 +29,7 @@
                         <div class="dropdown-menu dropdown-menu-right">
                             <a class="dropdown-item" href="#" @onclick:preventDefault @onclick="()=>SetFilter(FilterTypes.Channel,FilterChannels.TopRated)"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
                             <a class="dropdown-item" href="#" @onclick:preventDefault @onclick="()=>SetFilter(FilterTypes.Channel,FilterChannels.TopViewed)"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                           
+
                         </div>
                     </div>
                     <h6>Channels</h6>
@@ -71,7 +82,7 @@
                         <div class="dropdown-menu dropdown-menu-right">
                             <a class="dropdown-item" href="#" @onclick:preventDefault @onclick="()=>SetFilter(FilterTypes.Featured,FilterChannels.TopRated)"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
                             <a class="dropdown-item" href="#" @onclick:preventDefault @onclick="()=>SetFilter(FilterTypes.Featured,FilterChannels.TopViewed)"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                         
+
                         </div>
                     </div>
                     <h6>Featured Videos</h6>
@@ -99,12 +110,19 @@
                     </div>
                 </div>
             </Virtualize>
-           
-           
+
+
         </div>
     </div>
 </div>
+<ChannelDetail @ref="detail" TaskObject=@itemObject DataChanged="@DataChanged">
+    <CustomHeader>@customHeader</CustomHeader>
+</ChannelDetail>
+
 @code {
+    string customHeader = "Tambah Channel";
+    public Channel itemObject { get; set; } = new();
+    ChannelDetail detail;
     public string FilterChannel { get; set; } = FilterChannels.TopViewed;
     public string FilterFeatured { get; set; } = FilterChannels.TopViewed;
     public UserProfile SelUser { get; set; }
@@ -115,6 +133,12 @@
     public List<Post> ListFeatured { get; set; } = new();
     public Dictionary<long, bool> Subscribed { get; set; } = new();
     bool HasLogin = false;
+
+    private async void DataChanged()
+    {
+        LoadData();
+        StateHasChanged();
+    }
     protected override async Task OnInitializedAsync()
     {
 
@@ -131,7 +155,7 @@
     public enum FilterTypes { Channel, Featured }
     void SetFilter(FilterTypes filterType, string Filter)
     {
-        if(filterType== FilterTypes.Channel)
+        if (filterType == FilterTypes.Channel)
         {
             FilterChannel = Filter;
         }
@@ -165,7 +189,7 @@
             toastService.ShowWarning("Please login first.");
             return;
         }
-        if(item.UserName == SelUser.Username)
+        if (item.UserName == SelUser.Username)
         {
             toastService.ShowWarning("Kamu ga bisa subscribe channel sendiri.");
             return;
@@ -179,5 +203,13 @@
         {
             ChannelSvc.UnSubscribe(SelUser.Id, item.Id);
         }
+    }
+
+    async Task AddNewChannel()
+    {
+        itemObject = new Channel();
+        itemObject.CreatedDate = DateHelper.GetLocalTimeNow();
+        itemObject.UserId = SelUser.Id;
+        itemObject.UserName = SelUser.Username;
     }
 }

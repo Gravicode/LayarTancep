@@ -69,7 +69,7 @@ namespace LayarTancep.Data
             var keywords = Keyword?.Split(' ');
             if (keywords.Length > 0)
             {
-                var data = from x in db.Posts.Include(c => c.PostComments).Include(c => c.PostLikes).Include(c => c.User).AsEnumerable()
+                var data = from x in db.Posts.Include(c=>c.PostViews).Include(c => c.PostComments).Include(c => c.PostLikes).Include(c => c.User).AsEnumerable()
                            where keywords.Any((keystr) => x.Title.Contains(keystr))
                            //x.Message.Contains(Keyword)
                            select x;

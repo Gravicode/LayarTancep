@@ -1,5 +1,12 @@
 ﻿@page "/"
 @page "/index"
+@page "/index/{Keyword:string}"
+@inject IJSRuntime IJS
+@inject NavigationManager NavMgr
+@inject IToastService toastService
+@inject ChannelService ChannelSvc
+@inject PostService PostSvc
+@inject UserProfileService UserSvc
 
 <PageTitle>LayarTancep - Tempat berbagi video asyik dan bermanfaat</PageTitle>
 <div class="container-fluid pb-0">
@@ -8,9 +15,9 @@
             <div class="col-md-12">
                 <form class="mobile-search">
                     <div class="input-group">
-                        <input type="text" placeholder="Search for..." class="form-control">
+                        <input type="text" @bind="Keyword" placeholder="Search for..." class="form-control">
                         <div class="input-group-append">
-                            <button type="button" class="btn btn-dark"><i class="fas fa-search"></i></button>
+                            <button type="button" @onclick="Search" class="btn btn-dark"><i class="fas fa-search"></i></button>
                         </div>
                     </div>
                 </form>
@@ -25,125 +32,33 @@
                         <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-right">
+                        <div style="display:none;" class="dropdown-menu dropdown-menu-right">
                             <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
                             <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
                             <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
                         </div>
                     </div>
-                    <h6>Channels Categories</h6>
+                    <h6>Kategori Channel</h6>
                 </div>
             </div>
             <div class="col-md-12">
                 <div class="owl-carousel owl-carousel-category">
-                    <div class="item">
-                        <div class="category-item">
-                            <a href="#">
-                                <img class="img-fluid" src="img/s1.png" alt="">
-                                <h6>Your Life</h6>
-                                <p>74,853 views</p>
-                            </a>
+                    <Virtualize Items="@ListCategoryChannel" Context="item">
+                        <div @key="item.Category" class="item">
+                            <div class="category-item">
+                                <a href="@($"/channels/{item.Category}")">
+                                    <img class="img-fluid" src="@(string.IsNullOrEmpty(item.PicUrl)?"img/s1.png":item.PicUrl)" alt="">
+                                    <h6>
+                                        @item.Category @if (item.Channels.Count > 100)
+                                    {
+                                        <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></span>
+                                    }
+                                    </h6>
+                                    <p>@item.Channels.Count.ToString("n0") channels</p>
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="item">
-                        <div class="category-item">
-                            <a href="#">
-                                <img class="img-fluid" src="img/s2.png" alt="">
-                                <h6>Unboxing Cool</h6>
-                                <p>74,853 views</p>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="category-item">
-                            <a href="#">
-                                <img class="img-fluid" src="img/s3.png" alt="">
-                                <h6>Service Reviewing</h6>
-                                <p>74,853 views</p>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="category-item">
-                            <a href="#">
-                                <img class="img-fluid" src="img/s4.png" alt="">
-                                <h6>Gaming <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></span></h6>
-                                <p>74,853 views</p>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="category-item">
-                            <a href="#">
-                                <img class="img-fluid" src="img/s5.png" alt="">
-                                <h6>Technology Tutorials</h6>
-                                <p>74,853 views</p>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="category-item">
-                            <a href="#">
-                                <img class="img-fluid" src="img/s6.png" alt="">
-                                <h6>Singing</h6>
-                                <p>74,853 views</p>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="category-item">
-                            <a href="#">
-                                <img class="img-fluid" src="img/s7.png" alt="">
-                                <h6>Cooking</h6>
-                                <p>74,853 views</p>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="category-item">
-                            <a href="#">
-                                <img class="img-fluid" src="img/s8.png" alt="">
-                                <h6>Traveling</h6>
-                                <p>74,853 views</p>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="category-item">
-                            <a href="#">
-                                <img class="img-fluid" src="img/s1.png" alt="">
-                                <h6>Education</h6>
-                                <p>74,853 views</p>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="category-item">
-                            <a href="#">
-                                <img class="img-fluid" src="img/s2.png" alt="">
-                                <h6>Noodles, Sauces & Instant Food</h6>
-                                <p>74,853 views</p>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="category-item">
-                            <a href="#">
-                                <img class="img-fluid" src="img/s3.png" alt="">
-                                <h6>Comedy <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></span></h6>
-                                <p>74,853 views</p>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="category-item">
-                            <a href="#">
-                                <img class="img-fluid" src="img/s4.png" alt="">
-                                <h6>Lifestyle Advice</h6>
-                                <p>74,853 views</p>
-                            </a>
-                        </div>
-                    </div>
+                    </Virtualize>
                 </div>
             </div>
         </div>
@@ -158,174 +73,35 @@
                             Sort by <i class="fa fa-caret-down" aria-hidden="true"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
+                            <a class="dropdown-item" href="#" @onclick:preventDefault @onclick="()=>SetFilter(FilterTypes.Featured,FilterChannels.TopRated)"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
+                            <a class="dropdown-item" href="#" @onclick:preventDefault @onclick="()=>SetFilter(FilterTypes.Featured,FilterChannels.TopViewed)"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
                         </div>
                     </div>
                     <h6>Featured Videos</h6>
                 </div>
             </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="video-card">
-                    <div class="video-card-image">
-                        <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                        <a href="#"><img class="img-fluid" src="img/v1.png" alt=""></a>
-                        <div class="time">3:50</div>
-                    </div>
-                    <div class="video-card-body">
-                        <div class="video-title">
-                            <a href="#">There are many variations of passages of Lorem</a>
+            <Virtualize Items="@ListFeatured" Context="item">
+                <div @key="item.Id" class="col-xl-3 col-sm-6 mb-3">
+                    <div class="video-card">
+                        <div class="video-card-image">
+                            <a class="play-icon" href="@($"video-page/{item.Id}")"><i class="fas fa-play-circle"></i></a>
+                            <a href="@($"video-page/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.ImageUrls)?"img/v1.png":item.ImageUrls)" alt=""></a>
+                            <div class="time">@(item.Duration != null ? $"{item.Duration.Value.Hours}:{item.Duration.Value.Minutes}:{item.Duration.Value.Seconds}" : "00:00")</div>
                         </div>
-                        <div class="video-page text-success">
-                            Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                        </div>
-                        <div class="video-view">
-                            1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="video-card">
-                    <div class="video-card-image">
-                        <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                        <a href="#"><img class="img-fluid" src="img/v2.png" alt=""></a>
-                        <div class="time">3:50</div>
-                    </div>
-                    <div class="video-card-body">
-                        <div class="video-title">
-                            <a href="#">There are many variations of passages of Lorem</a>
-                        </div>
-                        <div class="video-page text-success">
-                            Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                        </div>
-                        <div class="video-view">
-                            1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
+                        <div class="video-card-body">
+                            <div class="video-title">
+                                <a href="@($"video-page/{item.Id}")">@item.Title</a>
+                            </div>
+                            <div class="video-page text-success">
+                                @item.Category  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
+                            </div>
+                            <div class="video-view">
+                                @NumberHelper.FormatNumber(item.PostViews.Count) views &nbsp;<i class="fas fa-calendar-alt"></i> @DateHelper.GetElapsedTime(item.CreatedDate)
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="video-card">
-                    <div class="video-card-image">
-                        <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                        <a href="#"><img class="img-fluid" src="img/v3.png" alt=""></a>
-                        <div class="time">3:50</div>
-                    </div>
-                    <div class="video-card-body">
-                        <div class="video-title">
-                            <a href="#">There are many variations of passages of Lorem</a>
-                        </div>
-                        <div class="video-page text-danger">
-                            Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Unverified"><i class="fas fa-frown text-danger"></i></a>
-                        </div>
-                        <div class="video-view">
-                            1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="video-card">
-                    <div class="video-card-image">
-                        <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                        <a href="#"><img class="img-fluid" src="img/v4.png" alt=""></a>
-                        <div class="time">3:50</div>
-                    </div>
-                    <div class="video-card-body">
-                        <div class="video-title">
-                            <a href="#">There are many variations of passages of Lorem</a>
-                        </div>
-                        <div class="video-page text-success">
-                            Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                        </div>
-                        <div class="video-view">
-                            1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="video-card">
-                    <div class="video-card-image">
-                        <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                        <a href="#"><img class="img-fluid" src="img/v5.png" alt=""></a>
-                        <div class="time">3:50</div>
-                    </div>
-                    <div class="video-card-body">
-                        <div class="video-title">
-                            <a href="#">There are many variations of passages of Lorem</a>
-                        </div>
-                        <div class="video-page text-success">
-                            Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                        </div>
-                        <div class="video-view">
-                            1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="video-card">
-                    <div class="video-card-image">
-                        <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                        <a href="#"><img class="img-fluid" src="img/v6.png" alt=""></a>
-                        <div class="time">3:50</div>
-                    </div>
-                    <div class="video-card-body">
-                        <div class="video-title">
-                            <a href="#">There are many variations of passages of Lorem</a>
-                        </div>
-                        <div class="video-page text-danger">
-                            Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Unverified"><i class="fas fa-frown text-danger"></i></a>
-                        </div>
-                        <div class="video-view">
-                            1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="video-card">
-                    <div class="video-card-image">
-                        <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                        <a href="#"><img class="img-fluid" src="img/v7.png" alt=""></a>
-                        <div class="time">3:50</div>
-                    </div>
-                    <div class="video-card-body">
-                        <div class="video-title">
-                            <a href="#">There are many variations of passages of Lorem</a>
-                        </div>
-                        <div class="video-page text-success">
-                            Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                        </div>
-                        <div class="video-view">
-                            1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="video-card">
-                    <div class="video-card-image">
-                        <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                        <a href="#"><img class="img-fluid" src="img/v8.png" alt=""></a>
-                        <div class="time">3:50</div>
-                    </div>
-                    <div class="video-card-body">
-                        <div class="video-title">
-                            <a href="#">There are many variations of passages of Lorem</a>
-                        </div>
-                        <div class="video-page text-success">
-                            Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                        </div>
-                        <div class="video-view">
-                            1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </Virtualize>
         </div>
     </div>
     <hr class="mt-0">
@@ -338,78 +114,135 @@
                             Sort by <i class="fa fa-caret-down" aria-hidden="true"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
+                            <a class="dropdown-item" href="#" @onclick:preventDefault @onclick="()=>SetFilter(FilterTypes.Channel,FilterChannels.TopRated)"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
+                            <a class="dropdown-item" href="#" @onclick:preventDefault @onclick="()=>SetFilter(FilterTypes.Channel,FilterChannels.TopViewed)"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
                         </div>
                     </div>
                     <h6>Popular Channels</h6>
                 </div>
             </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s1.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-outline-danger btn-sm">Subscribe <strong>1.4M</strong></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name</a>
+            <Virtualize Items="@ListPopularChannel" Context="item">
+                <div @key="item.Id" class="col-xl-3 col-sm-6 mb-3">
+                    <div class="channels-card">
+                        <div class="channels-card-image">
+                            <a href="@($"/single-channel/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.PicUrl)?"img/s1.png":item.PicUrl)" alt=""></a>
+                            <div class="channels-card-image-btn"><button type="button" @onclick="()=>ToggleSubscribe(item)" class="@((Subscribed.ContainsKey(item.Id) && Subscribed[item.Id]) ?  "btn btn-outline-secondary btn-sm" :"btn btn-outline-danger btn-sm" )"> @((Subscribed.ContainsKey(item.Id) && Subscribed[item.Id]) ? "Subscribed" : "Subscribe") <strong>@NumberHelper.FormatNumber(item.Subscribers.Count)</strong></button></div>
                         </div>
-                        <div class="channels-view">
-                            382,323 subscribers
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s2.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-outline-danger btn-sm">Subscribe <strong>1.4M</strong></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name</a>
-                        </div>
-                        <div class="channels-view">
-                            382,323 subscribers
+                        <div class="channels-card-body">
+                            <div class="channels-title">
+                                <a href="@($"/single-channel/{item.Id}")">@item.Name</a>
+                            </div>
+                            <div class="channels-view">
+                                @item.Subscribers.Count.ToString("n0") subscribers
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s3.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-outline-secondary btn-sm">Subscribed <strong>1.4M</strong></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle"></i></span></a>
-                        </div>
-                        <div class="channels-view">
-                            382,323 subscribers
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s4.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-outline-danger btn-sm">Subscribe <strong>1.4M</strong></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name</a>
-                        </div>
-                        <div class="channels-view">
-                            382,323 subscribers
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </Virtualize>
+
+
         </div>
     </div>
 </div>
+
+@code {
+    [Parameter]
+    public string Keyword { get; set; }
+    public string FilterChannel { get; set; } = FilterChannels.TopViewed;
+    public string FilterFeatured { get; set; } = FilterChannels.TopViewed;
+    public UserProfile SelUser { get; set; }
+    string UserName { set; get; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    public List<ChannelCategoryCls> ListCategoryChannel { get; set; } = new();
+    public List<Post> ListFeatured { get; set; } = new();
+    public List<Channel> ListPopularChannel { get; set; } = new();
+    public Dictionary<long, bool> Subscribed { get; set; } = new();
+    bool HasLogin = false;
+
+    private async void DataChanged()
+    {
+        LoadData();
+        StateHasChanged();
+    }
+    async Task Search()
+    {
+        if (string.IsNullOrEmpty(Keyword))
+        {
+            toastService.ShowInfo("Silakan isi keyword dulu.");
+            return;
+        }
+        ListFeatured = PostSvc.FindByKeyword(Keyword);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+            SelUser = UserSvc.GetItemByUsername(UserName);
+            HasLogin = true;
+        }
+        LoadData();
+    }
+    public enum FilterTypes { Channel, Featured }
+    async Task SetFilter(FilterTypes filterType, string Filter)
+    {
+        if (filterType == FilterTypes.Channel)
+        {
+            FilterChannel = Filter;
+        }
+        else
+        {
+            FilterFeatured = Filter;
+        }
+        LoadData();
+        if (!string.IsNullOrEmpty(Keyword)) await Search();
+
+    }
+
+    void LoadData()
+    {
+        ListCategoryChannel = ChannelSvc.GetChannelCategory();
+        ListFeatured = PostSvc.GetFeatured(FilterFeatured);
+        ListPopularChannel = ChannelSvc.GetLatest(FilterChannel);
+        Subscribed.Clear();
+        foreach (var channel in ListPopularChannel)
+        {
+            Subscribed.Add(channel.Id, channel.Subscribers.Any(x => x.UserId == SelUser.Id));
+        }
+    }
+
+    async Task OpenChannel(Channel item)
+    {
+        NavMgr.NavigateTo($"/single-channel/{item.Id}");
+    }
+
+    async Task ToggleSubscribe(Channel item)
+    {
+        if (!HasLogin)
+        {
+            toastService.ShowWarning("Please login first.");
+            return;
+        }
+        if (item.UserName == SelUser.Username)
+        {
+            toastService.ShowWarning("Kamu ga bisa subscribe channel sendiri.");
+            return;
+        }
+        var state = !Subscribed[item.Id];
+        if (state)
+        {
+            ChannelSvc.Subscribe(SelUser.Id, SelUser.Username, item.Id);
+        }
+        else
+        {
+            ChannelSvc.UnSubscribe(SelUser.Id, item.Id);
+        }
+    }
+
+
+}

@@ -210,6 +210,7 @@
         ListFeatured = PostSvc.GetFeatured(FilterFeatured);
         ListPopularChannel = ChannelSvc.GetLatest(FilterChannel);
         Subscribed.Clear();
+        if(string.IsNullOrEmpty(UserName))
         foreach (var channel in ListPopularChannel)
         {
             Subscribed.Add(channel.Id, channel.Subscribers.Any(x => x.UserId == SelUser.Id));

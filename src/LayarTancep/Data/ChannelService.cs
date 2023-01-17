@@ -78,6 +78,20 @@ namespace LayarTancep.Data
         {
             return db.Channels.Include(c=>c.Subscribers).OrderByDescending(x => x.CreatedDate).Take(Limit).ToList();
         }
+        public List<Channel> GetByUser(UserProfile user)
+        {
+            
+            var datas =  db.Channels.Where(x=>x.UserName == user.Username).OrderBy(x => x.Name).ToList();
+            if (!datas.Any())
+            {
+                var newChannel = new Channel() { UserId = user.Id, UserName = user.Username, CreatedDate = DateHelper.GetLocalTimeNow(), Desc="Default Channel", Name = "My Videos", Category = "General"   };
+                db.Channels.Add(newChannel);
+                db.SaveChanges();
+                datas = db.Channels.Where(x => x.UserName == user.Username).OrderBy(x => x.Name).ToList();
+            }
+            
+            return datas;
+        }
 
         public Channel GetDataById(object Id)
         {

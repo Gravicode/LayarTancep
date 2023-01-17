@@ -2,19 +2,374 @@
 @inject IJSRuntime IJS
 @inject NavigationManager NavMgr
 @inject IToastService toastService
-  
-<div class="container-fluid pt-5 pb-5">
-               <div class="row">
-                  <div class="col-md-8 mx-auto text-center upload-video pt-5 pb-5">
-                     <h1><i class="fas fa-file-upload text-primary"></i></h1>
-                     <h4 class="mt-5">Select Video files to upload</h4>
-                     <p class="land">or drag and drop video files</p>
-                     <div class="mt-4">
-                        <a class="btn btn-outline-primary" href="upload-video">Upload Video</a>
-                     </div>
-                  </div>
-               </div>
-            </div>
-@code {
+@inject PostService PostSvc
+@inject UserProfileService service
+@inject ChannelService ChannnelSvc
+@inject AzureBlobHelper AzureBlobHelper
 
+<InputFile class="uploadButton-input" id="fileVideo" accept="video/*" multiple OnChange="UploadFiles" hidden />
+@if (Mode == UploadModes.SelectFile)
+{
+    <div class="container-fluid pt-5 pb-5">
+        <div class="row">
+            <div class="col-md-8 mx-auto text-center upload-video pt-5 pb-5">
+                <h1><i class="fas fa-file-upload text-primary"></i></h1>
+                <h4 class="mt-5">Select Video files to upload</h4>
+                <p class="land">or drag and drop video files</p>
+                <div class="mt-4">
+                    <a class="btn btn-outline-primary" @onclick:preventDefault @onclick="(()=>PrepareUpload())" href="#">Upload Video</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid upload-details">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="main-title">
+                    <h6>Detail Upload</h6>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <div class="imgplace">
+                    @if (!IsUploading)
+                    {
+                        <img src="@(DataPost.ImageUrls)" alt="img">
+                    }
+                </div>
+            </div>
+            @if (IsUploading)
+            {
+                <div class="col-lg-10">
+                    <div class="osahan-title">@DataPost.Title</div>
+                    <div class="osahan-size">@DriveHelper.GetSize(CurrentVideo.Size). @(DriveHelper.GetSize((double)(100 - ProgressPercent) / 100 * CurrentVideo.Size)) Remaining.</div>
+                <div class="osahan-progress">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="@(ProgressPercent)" aria-valuemin="0" aria-valuemax="100" style="width: @(ProgressPercent)%"></div>
+                    </div>
+                    <div class="osahan-close">
+                        <a href="#"><i class="fas fa-times-circle"></i></a>
+                    </div>
+                </div>
+                <div class="osahan-desc">Video kamu sedang diupload, seduh kopi dululah biar seger...</div>
+            </div>
+            }
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="osahan-form">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label for="e1">Judul Video</label>
+                                <input type="text" placeholder="Judul Video Kamu" @bind="DataPost.Title" id="e1" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label for="e2">Deskripsi</label>
+                                <textarea rows="3" id="e2" @bind="DataPost.About" name="e2" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label for="e3">Kategori</label>
+                                <select @bind="DataPost.Category" id="e3" class="custom-select">
+                                     <option value="-">Pilih</option>
+                                    <option value="Auto & Vehicle">Auto & Vehicle</option>
+                                    <option value="Comedy">Comedy</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Film & Animation">Film & Animation</option>
+                                    <option value="Gaming">Gaming</option>
+                                    <option value="HowTo & Style">HowTo & Style</option>
+                                    <option value="Music">Music</option>
+                                    <option value="News & Politics">News & Politics</option>
+                                    <option value="NonProfits & Activism">NonProfits & Activism</option>
+                                    <option value="People & Blogs">People & Blogs</option>
+                                    <option value="Pets & Animals">Pets & Animals</option>
+                                    <option value="Science & Technology">Science & Technology</option>
+                                    <option value="Sports">Sports</option>
+                                    <option value="Travel & Events">Travel & Events</option>
+                                  
+                                </select>
+                            </div> 
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label for="e4">Setting Privasi</label>
+                                <select @bind="DataPost.Privacy" id="e4" class="custom-select">
+                                     <option value="-">Pilih</option>
+                                    <option value="Public">Public</option>
+                                    <option value="Private">Private</option>
+                                    <option value="Not Listed">Not Listed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label for="e5">Channel</label>
+                                <select @bind="DataPost.ChannelId" id="e5" class="custom-select">
+                                    @foreach(var channel in ListChannel){
+                                    <option value="@channel.Id">@channel.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                       
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label for="e6">Lisensi</label>
+                                <select @bind="DataPost.License" id="e6" class="custom-select">
+                                     <option value="-">Pilih</option>
+                                    <option value="Standard">Standard</option>
+                                    <option value="Creative Commons">Creative Commons</option>
+                                    <option value="Illegal Video">Illegal Video</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label for="e7">Tags (dipisah comma)</label>
+                                <input type="text" @bind="DataPost.Tag" placeholder="Gaming, PS4" id="e7" class="form-control">
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4">
+                            <div class="form-group">
+                                <label for="e9">Bahasa di Video (Opsional)</label>
+                                <select @bind="DataPost.Language" id="e9" class="custom-select">
+                                    <option value="-">Pilih</option>
+                                    <option value="English">English</option>
+                                    <option value="Bahasa">Bahasa</option>
+                                    <option value="Mandarin">Mandarin</option>
+                                    <option value="Arabic">Arabic</option>
+                                    <option value="Jawa">Jawa</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                 
+                </div>
+                <div class="osahan-area text-center mt-3">
+                    <button @onclick="Save" class="btn btn-outline-primary">Simpan</button>
+                </div>
+                <hr>
+                <div class="terms text-center">
+                    <p class="mb-0"><a href="#">Terms of Service</a> dan <a href="#">Guideline Komunitas</a>.</p>
+                    <p class="hidden-xs mb-0">Jangan upload video-video yang menggangu ketertiban dan tatanan dunia. </p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@code {
+    public List<Channel> ListChannel { get; set; }
+    public IBrowserFile CurrentVideo { get; set; }
+    public enum UploadModes { SelectFile, Upload }
+    bool IsUploading { set; get; } = false;
+    public UploadModes Mode { get; set; } = UploadModes.SelectFile;
+    bool IsFailed = false;
+    UserProfile SelUser = new UserProfile();
+    Post DataPost = new();
+    string ErrorMsg = string.Empty;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    string UserName;
+    private decimal progressPercent;
+    int ProgressPercent;
+    Emgu.CV.VideoCapture _capture;
+    async Task CloseMessage()
+    {
+        IsFailed = false;
+    }
+    private async Task UploadFiles(InputFileChangeEventArgs e)
+    {
+        IsUploading = true;
+        ProgressPercent = 0;
+        progressPercent = 0;
+        var fileurls = new List<string>();
+        Mode = UploadModes.Upload; 
+        foreach (var file in e.GetMultipleFiles(e.FileCount))
+        {
+            //var file = e.File;
+            if (file != null)
+            {
+                CurrentVideo = file;
+                var ms = new MemoryStream();
+                using var readStream = file.OpenReadStream(AppConstants.MaxAllowedFileSize);
+                var bytesRead = 0;
+                var totalRead = 0;
+                var buffer = new byte[1024 * 10];
+
+                while ((bytesRead = await readStream.ReadAsync(buffer)) != 0)
+                {
+                    totalRead += bytesRead;
+
+                    await ms.WriteAsync(buffer, 0, bytesRead);
+
+                    progressPercent = Decimal.Divide(totalRead, file.Size);
+                    ProgressPercent = (int)(100 * progressPercent);
+                    StateHasChanged();
+                    await Task.Delay(1);
+                }
+
+
+                var bytes = ms.ToArray();
+                try
+                {
+                    var pathToVideoFile = Path.GetTempFileName() + Path.GetExtension(file.Name);
+                    var screenShotFile = Path.GetTempFileName() + ".jpg";
+                    File.WriteAllBytes(pathToVideoFile, bytes);
+                    _capture = new Emgu.CV.VideoCapture(pathToVideoFile);
+                    var frame = _capture.QueryFrame();
+                    frame.Save(screenShotFile);
+                    var ScreenShotName = $"Screenshot_{(string.IsNullOrEmpty(SelUser.Username) ? "rojul" : SelUser.Username)}_{Tools.NumberGen.GenerateNumber(5)}.jpg";
+                    var FileUrlImg = $"{AppConstants.UploadUrlPrefix}{ScreenShotName}";
+                    await AzureBlobHelper.UploadFile(ScreenShotName, bytes);
+                    DataPost.ImageUrls = FileUrlImg;
+                }
+                catch (Exception ex)
+                {
+                    
+                    Console.WriteLine(ex);
+                }
+              
+
+                string newName = string.Empty;
+
+                newName = $"Post_{(string.IsNullOrEmpty(SelUser.Username) ? "rojul" : SelUser.Username)}_{DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss")}_{file.Name}";
+                var FileUrl = $"{AppConstants.UploadUrlPrefix}{newName}";
+                await AzureBlobHelper.UploadFile(newName, bytes);
+                fileurls.Add(FileUrl);
+
+            }
+            break;
+        }
+        IsUploading = false;
+        DataPost.VideoUrls = string.Join(';', fileurls);
+    }
+    async Task PrepareUpload()
+    {
+        await IJS.InvokeVoidAsync("OpenFileUpload", "fileVideo");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+            SelUser = service.GetItemByUsername(UserName);
+            DataPost.UserId = SelUser.Id;
+            DataPost.UserName = SelUser.Username;
+            DataPost.CreatedDate = DateHelper.GetLocalTimeNow();
+        }
+        ListChannel = ChannnelSvc.GetByUser(SelUser);
+
+    }
+        /*
+        async Task AddTag()
+        {
+        if (string.IsNullOrEmpty(NewTag)) return;
+        Tags.Add(NewTag);
+    NewTag = string.Empty;
+    }
+
+    async Task RemoveTag(string Name)
+        {
+        Tags.Remove(Name);
+    }
+    */
+    async Task Save()
+    {
+        IsFailed = true;
+        bool isPengurus = false;
+        ErrorMsg = "";
+
+
+        if (string.IsNullOrEmpty(DataPost.Title))
+        {
+            ErrorMsg += "Tolong di isi judul video. ";
+
+        }
+        if (string.IsNullOrEmpty(DataPost.About))
+        {
+            ErrorMsg += "Tolong di isi deskripsi. ";
+
+        }
+        if (string.IsNullOrEmpty(DataPost.Category))
+        {
+            ErrorMsg += "Tolong pilih kategori. ";
+
+        }
+
+        if (string.IsNullOrEmpty(DataPost.License))
+        {
+            ErrorMsg += "Tolong di isi license. ";
+
+        }
+        if (DataPost.ChannelId<=0)
+        {
+            ErrorMsg += "Tolong pilih channel. ";
+
+        }
+
+        if (ErrorMsg.Length > 0)
+        {
+            toastService.ShowWarning(ErrorMsg, "Perhatian");
+            return;
+        }
+
+        DataPost.CreatedDate = DateHelper.GetLocalTimeNow();
+
+        if (DataPost.Id > 0)
+        {
+            if (PostSvc.UpdateData(DataPost))
+            {
+
+                toastService.ShowSuccess("Video berhasil di simpan.", "Info");
+                IsFailed = false;
+                DataPost = new();
+                await Open("/");
+            }
+            else
+            {
+                IsFailed = true;
+                ErrorMsg += " Data Gagal disimpan.";
+
+            }
+        }
+        else
+        {
+            if (PostSvc.InsertData(DataPost))
+            {
+
+                toastService.ShowSuccess("Video berhasil di simpan.", "Info");
+                IsFailed = false;
+                DataPost = new() { UserId = SelUser.Id, UserName = SelUser.Username, CreatedDate = DateHelper.GetLocalTimeNow() };
+            }
+            else
+            {
+                ErrorMsg += " Data Gagal disimpan.";
+                IsFailed = true;
+            }
+        }
+
+    }
+    
+    async Task Open(string url)
+    {
+        if (!string.IsNullOrEmpty(url))
+            await IJS.InvokeVoidAsync("OpenUrl", url);
+    }
 }

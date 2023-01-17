@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.WebUtilities
 @inject IJSRuntime jsRuntime
 @inject IToastService toastService
+@inject UserProfileService UserSvc
 @inject NavigationManager NavMgr
 
 <section class="login-main-wrapper">
@@ -140,8 +141,16 @@
         }
         else
         {
-            string logUrl = $"/login?paramUsername={encode(Username)}&paramPassword={encode(Password)}";
-            await jsRuntime.InvokeAsync<object>("OpenUrl", logUrl);
+            if(UserSvc.Login(Username, Password))
+            {
+                string logUrl = $"/login?paramUsername={encode(Username)}&paramPassword={encode(Password)}";
+                await jsRuntime.InvokeAsync<object>("OpenUrl", logUrl);
+            }
+            else
+            {
+                toastService.ShowError("username/password salah atau tidak terdaftar", "Perhatian");
+            }
+
         }
         //NavMgr.NavigateTo(logUrl);
     }

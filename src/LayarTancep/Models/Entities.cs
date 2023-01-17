@@ -339,6 +339,10 @@ namespace LayarTancep.Models
         public string? LastName { set; get; }
       
         public string? AboutMe { set; get; }
+        public string? Country { set; get; }
+        public string? City { set; get; }
+        public string? ZipCode { set; get; }
+        public string? State { set; get; }
        
         public string? FBUrl { set; get; }
         public string? TwitterUrl { set; get; }

@@ -58,6 +58,26 @@ namespace LayarTancep.Models
     }
     #endregion
 
+    [Table("history")]
+    public class History
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        //user
+        [ForeignKey(nameof(User)), Column(Order = 0)]
+        public long UserId { get; set; }
+        public UserProfile User { set; get; }
+        public string UserName { set; get; }
+
+        [ForeignKey(nameof(Post)), Column(Order = 1)]
+        public long PostId { get; set; }
+        public Post Post { set; get; }
+        public DateTime CreatedDate { set; get; }
+        public DateTime UpdatedDate { set; get; }
+        public TimeSpan LastWatch { get; set; }
+    }
+    
     [Table("channel_view")]
     public class ChannelView
     {
@@ -104,6 +124,7 @@ namespace LayarTancep.Models
         public string Name { get; set; }
         public string? Desc { get; set; }
         public string Category { get; set; }
+        public string? PicUrl { get; set; }
         public string? Facebook { get; set; }
         public string? Twitter { get; set; }
         public string? Google { get; set; }
@@ -329,6 +350,7 @@ namespace LayarTancep.Models
         public ICollection<Post> Posts { get; set; }
         public ICollection<ChannelNotification> ChannelNotifications { get; set; }
         public ICollection<ChannelView> ChannelViews { get; set; }
+        public ICollection<History> MyHistory { get; set; }
     }
 
     [Table("contact")]

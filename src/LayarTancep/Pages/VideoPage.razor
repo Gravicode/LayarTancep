@@ -1,4 +1,5 @@
 ﻿@page "/video-page"
+@page "/video-page/{PostId:long}"
 @inject IJSRuntime IJS
 @inject NavigationManager NavMgr
 @inject IToastService toastService
@@ -565,5 +566,6 @@
     </div>
 </div>
 @code {
-
+    [Parameter]
+    public long PostId { get; set; }
 }

@@ -1,4 +1,5 @@
 ﻿@page "/single-channel"
+@page "/single-channel/{ChannelId:long}"
 @inject IJSRuntime IJS
 @inject NavigationManager NavMgr
 @inject IToastService toastService
@@ -331,6 +332,8 @@
                </div>
             </div>
 @code {
+    [Parameter]
+    public long ChannelId { get; set; }
     [CascadingParameter]
     public MainLayout Layout { get; set; }
     protected override async Task OnInitializedAsync()

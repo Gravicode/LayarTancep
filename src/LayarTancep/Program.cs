@@ -55,6 +55,7 @@ builder.Services.AddTransient<PostViewService>();
 builder.Services.AddTransient<PostCommentService>();
 builder.Services.AddTransient<CommentLikeService>();
 builder.Services.AddTransient<PostService>();
+builder.Services.AddTransient<HistoryService>();
 
 builder.Services.AddCors(options =>
 {

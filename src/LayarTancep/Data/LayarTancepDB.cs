@@ -20,6 +20,7 @@ namespace LayarTancep.Data
         {
         }
 
+        public DbSet<History> Historys { get; set; }     
         public DbSet<ChannelView> ChannelViews { get; set; }     
         public DbSet<ChannelNotification> ChannelNotifications { get; set; }     
         public DbSet<Channel> Channels { get; set; }     

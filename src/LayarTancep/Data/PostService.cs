@@ -182,6 +182,11 @@ namespace LayarTancep.Data
         public List<Post> GetAllData()
         {
             return db.Posts.OrderBy(x => x.Id).ToList();
+        } 
+        
+        public List<Post> GetFeatured(int Limit=12)
+        {
+            return db.Posts.Include(c=>c.PostViews).OrderByDescending(x=>x.PostViews.Count).ThenByDescending(x => x.CreatedDate).Take(Limit).ToList();
         }
 
         public Post GetDataById(object Id)

@@ -17,6 +17,42 @@ namespace LayarTancep.Data
             if (db == null) db = new LayarTancepDB();
 
         }
+        public bool UnSubscribe(long userid, long channelid)
+        {
+            try
+            {
+                var removeItem = db.Subscribes.Where(x => x.UserId == userid && x.ChannelId == channelid).FirstOrDefault();
+                if (removeItem != null)
+                {
+                    db.Subscribes.Remove(removeItem);
+                }
+
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            return false;
+        }
+
+
+        public bool Subscribe(long userid, string username, long channelid)
+        {
+            try
+            {
+                var newLike = new Subscribe() { SubscribeDate  = DateHelper.GetLocalTimeNow(), UserName = username, UserId = userid, ChannelId = channelid };
+                db.Subscribes.Add(newLike);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            return false;
+        }
         public bool DeleteData(object Id)
         {
             var selData = (db.Channels.Where(x => x.Id == (long)Id).FirstOrDefault());
@@ -36,6 +72,11 @@ namespace LayarTancep.Data
         public List<Channel> GetAllData()
         {
             return db.Channels.OrderBy(x => x.Id).ToList();
+        } 
+        
+        public List<Channel> GetLatest(int Limit=100)
+        {
+            return db.Channels.Include(c=>c.Subscribers).OrderByDescending(x => x.CreatedDate).Take(Limit).ToList();
         }
 
         public Channel GetDataById(object Id)

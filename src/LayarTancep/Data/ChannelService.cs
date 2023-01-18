@@ -17,6 +17,44 @@ namespace LayarTancep.Data
             if (db == null) db = new LayarTancepDB();
 
         }
+
+        public bool UnsetNotification(long userid, long channelid)
+        {
+            try
+            {
+                var removeItem = db.ChannelNotifications.Where(x => x.UserId == userid && x.ChannelId == channelid).FirstOrDefault();
+                if (removeItem != null)
+                {
+                    db.ChannelNotifications.Remove(removeItem);
+                }
+
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            return false;
+        }
+
+
+        public bool SetNotification(long userid, string username, long channelid)
+        {
+            try
+            {
+                var newNotif = new ChannelNotification() { CreatedDate = DateHelper.GetLocalTimeNow(), UserName = username, UserId = userid, ChannelId = channelid };
+                db.ChannelNotifications.Add(newNotif);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            return false;
+        }
+
         public bool UnSubscribe(long userid, long channelid)
         {
             try
@@ -117,7 +155,7 @@ namespace LayarTancep.Data
 
         public Channel GetDataById(object Id)
         {
-            return db.Channels.Include(x=>x.Subscribers).Include(c => c.Posts).Where(x => x.Id == (long)Id).FirstOrDefault();
+            return db.Channels.Include(x=>x.Subscribers).Include(c => c.Posts).ThenInclude(x=>x.PostViews).Where(x => x.Id == (long)Id).FirstOrDefault();
         }
 
 

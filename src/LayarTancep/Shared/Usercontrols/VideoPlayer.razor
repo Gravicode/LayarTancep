@@ -1,0 +1,26 @@
+﻿<video id="@VideoId"
+       class="video-js"
+       controls
+       preload="auto"
+       width="640"
+       height="315"
+       poster="@PosterUrl"
+       data-setup="{}">
+    @foreach (var videoUrl in VideoUrls)
+    {
+        <source src="@videoUrl" type="video/@(Path.GetExtension(videoUrl).Replace(".",string.Empty))" />
+    }
+    <p class="vjs-no-js">
+        To view this video please enable JavaScript, and consider upgrading to a
+        web browser that
+        <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+    </p>
+</video>
+@code {
+    public string VideoId { get; set; } = "my-video";
+    [Parameter]
+    public string PosterUrl { get; set; } = "MY_VIDEO_POSTER.jpg";
+    [Parameter]
+    public List<string> VideoUrls { get; set; } = new() { };
+}
+

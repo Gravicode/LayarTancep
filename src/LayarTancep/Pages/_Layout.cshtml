@@ -32,7 +32,7 @@
     <!-- Owl Carousel -->
     <link rel="stylesheet" href="vendor/owl-carousel/owl.carousel.css">
     <link rel="stylesheet" href="vendor/owl-carousel/owl.theme.css">
-
+    <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 
 </head>
@@ -64,11 +64,11 @@
     <script src="_content/ChartJs.Blazor.Fork/ChartJsBlazorInterop.js"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpqcgMnKf1TnQPRQKNmlnUgqh_EI0t_Iw&v=3"></script>
     <script src="_content/BlazorGoogleMaps/objectManager.js"></script>
-    
+
+    <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
     <!-- Page level custom scripts -->
 
-    <script>
-        function OpenFileUpload(uploadid) {
+    <script>function OpenFileUpload(uploadid) {
 
             $('#' + uploadid + ':hidden').trigger('click');
         }
@@ -154,8 +154,7 @@
         function setTextDirectionOfBody(direction) {
             var body = getBodyElement();
             body.dir = direction;
-        }
-    </script>
+        }</script>
 
     <script src="_framework/blazor.server.js"></script>
 </body>

@@ -3,185 +3,55 @@
 @inject IJSRuntime IJS
 @inject NavigationManager NavMgr
 @inject IToastService toastService
+@inject PostCommentService PostCommentSvc
+@inject ChannelService ChannelSvc
+@inject PostService PostSvc
+@inject UserProfileService UserSvc
+
 
 <div class="container-fluid pb-0">
     <div class="video-block-right-list section-padding">
         <div class="row mb-4">
             <div class="col-md-8">
                 <div class="single-video">
-                    <iframe width="100%" height="315" src="https://www.youtube-nocookie.com/embed/8LWZSGNjuF0?rel=0&amp;controls=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    <VideoPlayer VideoUrls="@VideoUrl" PosterUrl="@CurrentVideo?.ImageUrls"></VideoPlayer>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="video-slider-right-list">
-                    <div class="video-card video-card-list">
-                        <div class="video-card-image">
-                            <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                            <a href="#"><img class="img-fluid" src="img/v1.png" alt=""></a>
-                            <div class="time">3:50</div>
-                        </div>
-                        <div class="video-card-body">
-                            <div class="btn-group float-right right-action">
-                                <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
+                    <Virtualize Items="@ListVideo" Context="item">
+                        <div @key="item.Id" class="video-card video-card-list active">
+                            <div class="video-card-image">
+                                <a class="play-icon" href="@($"video-page/{item.Id}")"><i class="fas fa-play-circle"></i></a>
+                                <a href="@($"video-page/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.ImageUrls)?"img/v2.png":item.ImageUrls)" alt=""></a>
+                                <div class="time">@(item.Duration != null ? $"{item.Duration.Value.Hours}:{item.Duration.Value.Minutes}:{item.Duration.Value.Seconds}" : "00:00")</div>
+                            </div>
+                            <div class="video-card-body">
+                                <div class="btn-group float-right right-action">
+                                    <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
+                                        <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
+                                        <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
+                                    </div>
+                                </div>
+                                <div class="video-title">
+                                    <a href="@($"video-page/{item.Id}")">@item.Title</a>
+                                </div>
+                                <div class="video-page text-success">
+                                    @item.Category  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
+                                </div>
+                                <div class="video-view">
+                                    @NumberHelper.FormatNumber(item.PostViews.Count)  views &nbsp;<i class="fas fa-calendar-alt"></i> @DateHelper.GetElapsedTime(item.CreatedDate)
                                 </div>
                             </div>
-                            <div class="video-title">
-                                <a href="#">Here are many variati of passages of Lorem</a>
-                            </div>
-                            <div class="video-page text-success">
-                                Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                            </div>
-                            <div class="video-view">
-                                1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                            </div>
                         </div>
-                    </div>
-                    <div class="video-card video-card-list active">
-                        <div class="video-card-image">
-                            <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                            <a href="#"><img class="img-fluid" src="img/v2.png" alt=""></a>
-                            <div class="time">3:50</div>
-                        </div>
-                        <div class="video-card-body">
-                            <div class="btn-group float-right right-action">
-                                <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
-                                </div>
-                            </div>
-                            <div class="video-title">
-                                <a href="#">Duis aute irure dolor in reprehenderit in.</a>
-                            </div>
-                            <div class="video-page text-success">
-                                Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                            </div>
-                            <div class="video-view">
-                                1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                            </div>
-                        </div>
-                    </div>
-                    <div class="video-card video-card-list">
-                        <div class="video-card-image">
-                            <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                            <a href="#"><img class="img-fluid" src="img/v3.png" alt=""></a>
-                            <div class="time">3:50</div>
-                        </div>
-                        <div class="video-card-body">
-                            <div class="btn-group float-right right-action">
-                                <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
-                                </div>
-                            </div>
-                            <div class="video-title">
-                                <a href="#">Culpa qui officia deserunt mollit anim</a>
-                            </div>
-                            <div class="video-page text-success">
-                                Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                            </div>
-                            <div class="video-view">
-                                1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                            </div>
-                        </div>
-                    </div>
-                    <div class="video-card video-card-list">
-                        <div class="video-card-image">
-                            <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                            <a href="#"><img class="img-fluid" src="img/v4.png" alt=""></a>
-                            <div class="time">3:50</div>
-                        </div>
-                        <div class="video-card-body">
-                            <div class="btn-group float-right right-action">
-                                <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
-                                </div>
-                            </div>
-                            <div class="video-title">
-                                <a href="#">Deserunt mollit anim id est laborum.</a>
-                            </div>
-                            <div class="video-page text-success">
-                                Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                            </div>
-                            <div class="video-view">
-                                1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                            </div>
-                        </div>
-                    </div>
-                    <div class="video-card video-card-list">
-                        <div class="video-card-image">
-                            <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                            <a href="#"><img class="img-fluid" src="img/v5.png" alt=""></a>
-                            <div class="time">3:50</div>
-                        </div>
-                        <div class="video-card-body">
-                            <div class="btn-group float-right right-action">
-                                <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
-                                </div>
-                            </div>
-                            <div class="video-title">
-                                <a href="#">Exercitation ullamco laboris nisi ut.</a>
-                            </div>
-                            <div class="video-page text-success">
-                                Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                            </div>
-                            <div class="video-view">
-                                1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                            </div>
-                        </div>
-                    </div>
-                    <div class="video-card video-card-list">
-                        <div class="video-card-image">
-                            <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                            <a href="#"><img class="img-fluid" src="img/v6.png" alt=""></a>
-                            <div class="time">3:50</div>
-                        </div>
-                        <div class="video-card-body">
-                            <div class="btn-group float-right right-action">
-                                <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
-                                </div>
-                            </div>
-                            <div class="video-title">
-                                <a href="#">There are many variations of passages of Lorem</a>
-                            </div>
-                            <div class="video-page text-success">
-                                Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                            </div>
-                            <div class="video-view">
-                                1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                            </div>
-                        </div>
-                    </div>
+
+                    </Virtualize>
+
+
                 </div>
             </div>
         </div>
@@ -191,51 +61,35 @@
             <div class="col-md-8">
                 <div class="single-video-left">
                     <div class="single-video-title box mb-3">
-                        <h2><a href="#">Contrary to popular belief, Lorem Ipsum (2020) is not.</a></h2>
-                        <p class="mb-0"><i class="fas fa-eye"></i> 2,729,347 views</p>
+                        <h2><a href="#">@CurrentVideo?.Title</a></h2>
+                        <p class="mb-0"><i class="fas fa-eye"></i> @CurrentVideo?.PostViews.Count.ToString("n0") views</p>
                     </div>
                     <div class="single-video-author box mb-3">
-                        <div class="float-right"><button class="btn btn-danger" type="button">Subscribe <strong>1.4M</strong></button> <button class="btn btn btn-outline-danger" type="button"><i class="fas fa-bell"></i></button></div>
-                        <img class="img-fluid" src="img/s4.png" alt="">
-                        <p><a href="#"><strong>Osahan Channel</strong></a> <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></span></p>
-                        <small>Published on Aug 10, 2020</small>
+                        <div class="float-right"><button class="btn btn-danger" @onclick="ToggleSubscribe" type="button">@((Subscribed? "Subscribed": "Subscribe"))  <strong>@(CurrentChannel == null ? 0 : NumberHelper.FormatNumber(CurrentChannel.Subscribers.Count))</strong></button> <button class="btn btn @(Notified ? "btn-outline-success":"btn-outline-danger")" type="button" @onclick="ToggleNotification"><i class="fas fa-bell"></i></button></div>
+                        <img class="img-fluid" src="@(string.IsNullOrEmpty(CurrentChannel.PicUrl)?"img/s4.png":CurrentChannel.PicUrl)" alt="">
+                        <p><a href="#"><strong>@CurrentChannel.Name</strong></a> <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></span></p>
+                        <small>Published on @CurrentVideo.CreatedDate.ToString("MMM dd, yyyy")</small>
                     </div>
                     <div class="single-video-info-content box mb-3">
-                        <h6>Cast:</h6>
-                        <p>Nathan Drake , Victor Sullivan , Sam Drake , Elena Fisher</p>
                         <h6>Category :</h6>
-                        <p>Gaming , PS4 Exclusive , Gameplay , 1080p</p>
+                        <p>@CurrentVideo.Category</p>
                         <h6>About :</h6>
-                        <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as evolved over the years, sometimes </p>
+                        <p>@CurrentVideo.About </p>
                         <h6>Tags :</h6>
                         <p class="tags mb-0">
-                            <span><a href="#">Uncharted 4</a></span>
-                            <span><a href="#">Playstation 4</a></span>
-                            <span><a href="#">Gameplay</a></span>
-                            <span><a href="#">1080P</a></span>
-                            <span><a href="#">ps4Share</a></span>
-                            <span><a href="#">+ 6</a></span>
+                            @foreach (var tag in CurrentVideo.Tag.Split(','))
+                            {
+                                <span><a href="#">@tag</a></span>
+                            }
                         </p>
                     </div>
                     <div class="box mb-3 single-video-comment-tabs">
                         <ul class="nav nav-tabs" role="tablist">
                             <li class="nav-item">
-                                <a class="nav-link active" id="retro-comments-tab" data-toggle="tab" href="#retro-comments" role="tab" aria-controls="retro" aria-selected="false">vidoe Comments</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="disqus-comments-tab" data-toggle="tab" href="#disqus-comments" role="tab" aria-controls="disqus" aria-selected="true">Disqus Comments</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="facebook-comments-tab" data-toggle="tab" href="#facebook-comments" role="tab" aria-controls="facebook" aria-selected="false">Facebook Comments</a>
+                                <a class="nav-link active" id="retro-comments-tab" data-toggle="tab" href="#retro-comments" role="tab" aria-controls="retro" aria-selected="false">Komentar</a>
                             </li>
                         </ul>
                         <div class="tab-content">
-                            <div class="tab-pane fade" id="disqus-comments" role="tabpanel" aria-labelledby="disqus-comments-tab">
-                                <h1>Soon...</h1>
-                            </div>
-                            <div class="tab-pane fade" id="facebook-comments" role="tabpanel" aria-labelledby="facebook-comments-tab">
-                                <h1>Soon...</h1>
-                            </div>
                             <div class="tab-pane fade show active" id="retro-comments" role="tabpanel" aria-labelledby="retro-comments-tab">
                                 <div class="reviews-members pt-0">
                                     <div class="media">
@@ -246,25 +100,26 @@
                                             </div>
                                             <div class="form-members-footer text-right mt-2">
                                                 <b class="float-left">
-                                                    12,725 Comments
+                                                    @CurrentVideo.PostComments.Count.ToString("n0") Comments
                                                 </b>
-                                                <button class="btn btn-outline-danger btn-sm" type="button">CANCEL</button> <button class="btn btn-danger btn-sm" type="button">COMMENT</button>
+                                                <button @onclick="ClearComment" class="btn btn-outline-danger btn-sm" type="button">CANCEL</button> <button @onclick="AddComment" class="btn btn-danger btn-sm" type="button">COMMENT</button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                @foreach(var comment in CurrentVideo.PostComments) { 
                                 <div class="reviews-members">
                                     <div class="media">
-                                        <a href="#"><img class="mr-3" src="img/s2.png" alt="Generic placeholder image"></a>
+                                        <a href="#"><img class="mr-3" src="@(string.IsNullOrEmpty(comment.User.PicUrl)?"img/s2.png":comment.User.PicUrl)" alt="Generic placeholder image"></a>
                                         <div class="media-body">
                                             <div class="reviews-members-header">
-                                                <h6 class="mb-1"><a class="text-black" href="#">Gurdeep Osahan </a> <small class="text-gray">2 months ago</small></h6>
+                                                <h6 class="mb-1"><a class="text-black" href="#">@comment.User.FullName </a> <small class="text-gray">@DateHelper.GetElapsedTime(comment.CreatedDate)</small></h6>
                                             </div>
                                             <div class="reviews-members-body">
-                                                <p> reacthe last order. Even though they had Chefs in their open kitchen they weren’t flexible to dish out few more items. Anyway the food was super specially their stone dessert.</p>
+                                                <p> @comment.Comment</p>
                                             </div>
                                             <div class="reviews-members-footer">
-                                                <a class="total-like" href="#"><i class="fas fa-thumbs-up"></i> 123</a> <a class="total-like" href="#"><i class="fas fa-thumbs-down"></i> 02</a>
+                                                <a class="total-like" href="#"><i class="fas fa-thumbs-up"></i> @comment.CommentLikes.Count.ToString("n0")</a> <a class="total-like" href="#"><i class="fas fa-thumbs-down"></i> 02</a>
                                                 <span dir="rtl" class="total-like-user-main ml-2">
                                                     <a href="#" title="Gurdeep Osahan" data-placement="top" data-toggle="tooltip"><img class="total-like-user" src="img/s1.png" alt="Generic placeholder image"></a>
                                                     <a href="#" title="Gurdeep Osahan" data-placement="top" data-toggle="tooltip"><img class="total-like-user" src="img/s2.png" alt="Generic placeholder image"></a>
@@ -275,28 +130,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="reviews-members">
-                                    <div class="media">
-                                        <a href="#"><img alt="Generic placeholder image" src="img/s3.png" class="mr-3"></a>
-                                        <div class="media-body">
-                                            <div class="reviews-members-header">
-                                                <h6 class="mb-1"><a href="#" class="text-black">Gurdeep Osahan </a> <small class="text-gray">2 months ago</small></h6>
-                                            </div>
-                                            <div class="reviews-members-body">
-                                                <p>Was here impromptu in their first week, reacthe last order. Even though they had Chefs in their open kitchen they weren’t flexible to dish out few more items.</p>
-                                            </div>
-                                            <div class="reviews-members-footer">
-                                                <a href="#" class="total-like"><i class="fas fa-thumbs-up"></i> 123</a> <a href="#" class="total-like"><i class="fas fa-thumbs-down"></i> 02</a>
-                                                <span class="total-like-user-main ml-2" dir="rtl">
-                                                    <a data-toggle="tooltip" data-placement="top" title="Gurdeep Osahan" href="#"><img alt="Generic placeholder image" src="img/s5.png" class="total-like-user"></a>
-                                                    <a data-toggle="tooltip" data-placement="top" title="Gurdeep Osahan" href="#"><img alt="Generic placeholder image" src="img/s6.png" class="total-like-user"></a>
-                                                    <a data-toggle="tooltip" data-placement="top" title="Gurdeep Osahan" href="#"><img alt="Generic placeholder image" src="img/s7.png" class="total-like-user"></a>
-                                                    <a data-toggle="tooltip" data-placement="top" title="Gurdeep Osahan" href="#"><img alt="Generic placeholder image" src="img/s8.png" class="total-like-user"></a>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                             }
 
                             </div>
                         </div>
@@ -566,6 +400,148 @@
     </div>
 </div>
 @code {
+    string NewComment = string.Empty;
+    public List<string> VideoUrl { get; set; } = new();
     [Parameter]
     public long PostId { get; set; }
+    public UserProfile SelUser { get; set; }
+    string UserName { set; get; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    public List<Post> ListVideo { get; set; } = new();
+    public List<Post> ListOtherVideo { get; set; } = new();
+    public Channel CurrentChannel { get; set; } = new();
+    public bool Subscribed { get; set; }
+    public bool Notified { get; set; }
+    bool HasLogin = false;
+
+    public Post CurrentVideo { get; set; }
+
+    [CascadingParameter]
+    public MainLayout Layout { get; set; }
+    async Task ClearComment()
+    {
+        NewComment = string.Empty;
+    }
+    async Task AddComment()
+    {
+        if (!HasLogin)
+        {
+            toastService.ShowInfo("Login dulu sebelum komentar.");
+            return;
+        }
+        if (!string.IsNullOrEmpty(NewComment))
+        {
+            var newComment = new PostComment() { Comment = NewComment, CreatedDate = DateHelper.GetLocalTimeNow(), PostId = CurrentVideo.Id, UserId = SelUser.Id, Username = SelUser.Username };
+            var res = PostCommentSvc.InsertData(newComment);
+            if (res)
+            {
+                toastService.ShowSuccess("komentar ditambahkan.");
+            }
+        }
+        else
+        {
+            toastService.ShowWarning("Isi komentarnya dulu ya.");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+            SelUser = UserSvc.GetItemByUsername(UserName);
+            HasLogin = true;
+        }
+
+        if (PostId <= 0)
+        {
+            var myvideos = PostSvc.GetByUser(SelUser.Username);
+            if (myvideos.Any()) PostId = myvideos.First().Id;
+        }
+        if (PostId <= 0)
+        {
+            NavMgr.NavigateTo("/");
+            toastService.ShowInfo("Please select specific video");
+        }
+        else
+        {
+            LoadData();
+        }
+    }
+
+    private async void DataChanged()
+    {
+        LoadData();
+        StateHasChanged();
+    }
+
+
+
+    async void LoadData()
+    {
+        CurrentVideo = PostSvc.GetDataById(PostId);
+        Subscribed = CurrentVideo.Channel.Subscribers.Any(x => x.UserId == SelUser.Id);
+        Notified = CurrentVideo.Channel.ChannelNotifications.Any(x => x.UserId == SelUser.Id);
+        ListVideo = CurrentVideo.Channel.Posts.ToList();
+        ListOtherVideo = PostSvc.GetSimilar(CurrentVideo);
+        VideoUrl.Clear();
+        VideoUrl.Add(CurrentVideo.VideoUrls);
+    }
+
+    async Task OpenChannel(Channel item)
+    {
+        NavMgr.NavigateTo($"/single-channel/{item.Id}");
+    }
+
+    async Task ToggleSubscribe()
+    {
+        if (!HasLogin)
+        {
+            toastService.ShowWarning("Please login first.");
+            return;
+        }
+        if (CurrentChannel.UserName == SelUser.Username)
+        {
+            toastService.ShowWarning("Kamu ga bisa subscribe channel sendiri.");
+            return;
+        }
+        var state = !Subscribed;
+        if (state)
+        {
+            ChannelSvc.Subscribe(SelUser.Id, SelUser.Username, CurrentChannel.Id);
+        }
+        else
+        {
+            ChannelSvc.UnSubscribe(SelUser.Id, CurrentChannel.Id);
+        }
+    }
+
+    async Task ToggleNotification()
+    {
+        if (!HasLogin)
+        {
+            toastService.ShowWarning("Please login first.");
+            return;
+        }
+        if (CurrentChannel.UserName == SelUser.Username)
+        {
+            toastService.ShowWarning("Kamu ga bisa set notifikasi ke channel sendiri.");
+            return;
+        }
+        var state = !Notified;
+        if (state)
+        {
+            ChannelSvc.SetNotification(SelUser.Id, SelUser.Username, CurrentChannel.Id);
+        }
+        else
+        {
+            ChannelSvc.UnsetNotification(SelUser.Id, CurrentChannel.Id);
+        }
+    }
+
+}
 }

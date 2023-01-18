@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LayarTancep.Helpers;
 
 namespace LayarTancep.Data
 {
@@ -153,7 +154,18 @@ namespace LayarTancep.Data
             return data.Take(100).ToList();
 
         }
-        public List<Post> GetTimeline(string Username)
+        public List<Post> GetByUser(string Username,int Limit = 10)
+        {
+            if (string.IsNullOrEmpty(Username))
+                return default;
+                var data = from x in db.Posts.Include(c => c.PostComments).Include(c => c.PostLikes).Include(c => c.User)
+                           where x.UserName == Username
+                           orderby x.CreatedDate descending
+                           select x;
+                return data.Take(Limit).ToList();
+        }
+
+            public List<Post> GetTimeline(string Username)
         {
             if (string.IsNullOrEmpty(Username))
             {
@@ -178,7 +190,21 @@ namespace LayarTancep.Data
                 return union.Take(100).ToList();
             }
         }
-
+        public List<Post> GetSimilar(Post item)
+        {
+            var datas = db.Posts.Where(x=>x.Category == item.Category).OrderBy(x => x.Id).ToList();
+            if (datas.Count > 0)
+            {
+                var tags = item.Tag.Split(",");
+                if (tags.Length > 0)
+                {
+                    var filtered = datas.Where(x => x.Tag.ContainsAny(tags)).ToList();
+                    if(filtered.Count>0)    
+                        return filtered;
+                }
+            }
+            return datas;
+        }
         public List<Post> GetAllData()
         {
             return db.Posts.OrderBy(x => x.Id).ToList();
@@ -198,7 +224,7 @@ namespace LayarTancep.Data
 
         public Post GetDataById(object Id)
         {
-            return db.Posts.Where(x => x.Id == (long)Id).FirstOrDefault();
+            return db.Posts.Include(c=>c.Channel).ThenInclude(c=>c.Subscribers).ThenInclude(c=>c.Channel.ChannelNotifications).ThenInclude(c=>c.Channel.Posts).Include(c => c.PostLikes).Include(c => c.PostComments).Include(c=>c.PostViews).Where(x => x.Id == (long)Id).FirstOrDefault();
         }
 
 

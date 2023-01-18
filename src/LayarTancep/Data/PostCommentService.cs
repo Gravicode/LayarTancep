@@ -17,6 +17,39 @@ namespace LayarTancep.Data
             if (db == null) db = new LayarTancepDB();
 
         }
+
+        public bool UnLikeComment(long userid, string username, long commentid)
+        {
+            try
+            {
+                var newUnLike = new CommentUnlike() { CreatedDate = DateHelper.GetLocalTimeNow(), UnlikedByUserName = username, UnlikedByUserId = userid, CommentId = commentid };
+                db.CommentUnlikes.Add(newUnLike);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            return false;
+        }
+
+
+        public bool LikeComment(long userid, string username, long commentid)
+        {
+            try
+            {
+                var newLike = new CommentLike() { CreatedDate = DateHelper.GetLocalTimeNow(), LikedByUserName = username, LikedByUserId = userid, CommentId = commentid };
+                db.CommentLikes.Add(newLike);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            return false;
+        }
         public bool DeleteData(object Id)
         {
             var selData = (db.PostComments.Where(x => x.Id == (long)Id).FirstOrDefault());

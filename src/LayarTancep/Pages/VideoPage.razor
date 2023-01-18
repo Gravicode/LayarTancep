@@ -4,6 +4,8 @@
 @inject NavigationManager NavMgr
 @inject IToastService toastService
 @inject PostCommentService PostCommentSvc
+@inject CommentLikeService CommentLikeSvc
+@inject CommentUnlikeService CommentUnlikeSvc
 @inject ChannelService ChannelSvc
 @inject PostService PostSvc
 @inject UserProfileService UserSvc
@@ -20,7 +22,7 @@
             <div class="col-md-4">
                 <div class="video-slider-right-list">
                     <Virtualize Items="@ListVideo" Context="item">
-                        <div @key="item.Id" class="video-card video-card-list active">
+                        <div @key="item.Id" class="video-card video-card-list @(item.Id == CurrentVideo.Id ? "Active" : "")">
                             <div class="video-card-image">
                                 <a class="play-icon" href="@($"video-page/{item.Id}")"><i class="fas fa-play-circle"></i></a>
                                 <a href="@($"video-page/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.ImageUrls)?"img/v2.png":item.ImageUrls)" alt=""></a>
@@ -119,12 +121,14 @@
                                                 <p> @comment.Comment</p>
                                             </div>
                                             <div class="reviews-members-footer">
-                                                <a class="total-like" href="#"><i class="fas fa-thumbs-up"></i> @comment.CommentLikes.Count.ToString("n0")</a> <a class="total-like" href="#"><i class="fas fa-thumbs-down"></i> 02</a>
+                                                    <a class="total-like" @onclick:preventDefault @onclick="()=>LikeComment(comment)" href="#"><i class="fas fa-thumbs-up"></i> @comment.CommentLikes.Count.ToString("n0")</a> <a class="total-like" @onclick:preventDefault @onclick="()=>UnLikeComment(comment)" href="#"><i class="fas fa-thumbs-down"></i> @comment.CommentUnlikes.Count.ToString("n0")</a>
                                                 <span dir="rtl" class="total-like-user-main ml-2">
-                                                    <a href="#" title="Gurdeep Osahan" data-placement="top" data-toggle="tooltip"><img class="total-like-user" src="img/s1.png" alt="Generic placeholder image"></a>
-                                                    <a href="#" title="Gurdeep Osahan" data-placement="top" data-toggle="tooltip"><img class="total-like-user" src="img/s2.png" alt="Generic placeholder image"></a>
-                                                    <a href="#" title="Gurdeep Osahan" data-placement="top" data-toggle="tooltip"><img class="total-like-user" src="img/s3.png" alt="Generic placeholder image"></a>
-                                                    <a href="#" title="Gurdeep Osahan" data-placement="top" data-toggle="tooltip"><img class="total-like-user" src="img/s4.png" alt="Generic placeholder image"></a>
+                                                    @if(comment.CommentLikes.Count>0)
+                                                            foreach(var commentlike in comment.CommentLikes.Take(4))
+                                                            {
+                                                                <a href="#" title="@commentlike.LikedByUser.FullName" data-placement="top" data-toggle="tooltip"><img class="total-like-user" src="@(string.IsNullOrEmpty(@commentlike.LikedByUser.PicUrl)?"img/s1.png":@commentlike.LikedByUser.PicUrl)" alt="Generic placeholder image"></a>
+                                                            }
+                                                  
                                                 </span>
                                             </div>
                                         </div>
@@ -143,7 +147,7 @@
                         <div class="col-md-12">
                             <div class="adblock">
                                 <div class="img">
-                                    Google AdSense<br>
+                                    Space Iklan<br>
                                     336 x 280
                                 </div>
                             </div>
@@ -162,236 +166,39 @@
                             </div>
                         </div>
                         <div class="col-md-12">
-                            <div class="video-card video-card-list">
-                                <div class="video-card-image">
-                                    <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                                    <a href="#"><img class="img-fluid" src="img/v1.png" alt=""></a>
-                                    <div class="time">3:50</div>
-                                </div>
-                                <div class="video-card-body">
-                                    <div class="btn-group float-right right-action">
-                                        <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
+                            <Virtualize Items="@ListOtherVideo" Context="item">
+                                <div @key="item.Id" class="video-card video-card-list">
+                                    <div class="video-card-image">
+                                        <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
+                                        <a href="@($"video-page/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.ImageUrls)?"img/v1.png":item.ImageUrls)" alt=""></a>
+                                        <div class="time">@(item.Duration != null ? $"{item.Duration.Value.Hours}:{item.Duration.Value.Minutes}:{item.Duration.Value.Seconds}" : "00:00")</div>
+                                    </div>
+                                    <div class="video-card-body">
+                                        <div class="btn-group float-right right-action">
+                                            <a href="@($"video-page/{item.Id}")" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
+                                                <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
+                                                <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
+                                            </div>
+                                        </div>
+                                        <div class="video-title">
+                                            <a href="@($"video-page/{item.Id}")">@item.Title</a>
+                                        </div>
+                                        <div class="video-page text-success">
+                                            @item.Category  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
+                                        </div>
+                                        <div class="video-view">
+                                            @NumberHelper.FormatNumber(item.PostViews.Count) views &nbsp;<i class="fas fa-calendar-alt"></i> @DateHelper.GetElapsedTime(item.CreatedDate)
                                         </div>
                                     </div>
-                                    <div class="video-title">
-                                        <a href="#">Here are many variati of passages of Lorem</a>
-                                    </div>
-                                    <div class="video-page text-success">
-                                        Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                                    </div>
-                                    <div class="video-view">
-                                        1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                                    </div>
                                 </div>
-                            </div>
-                            <div class="video-card video-card-list">
-                                <div class="video-card-image">
-                                    <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                                    <a href="#"><img class="img-fluid" src="img/v2.png" alt=""></a>
-                                    <div class="time">3:50</div>
-                                </div>
-                                <div class="video-card-body">
-                                    <div class="btn-group float-right right-action">
-                                        <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
-                                        </div>
-                                    </div>
-                                    <div class="video-title">
-                                        <a href="#">Duis aute irure dolor in reprehenderit in.</a>
-                                    </div>
-                                    <div class="video-page text-success">
-                                        Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                                    </div>
-                                    <div class="video-view">
-                                        1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="video-card video-card-list">
-                                <div class="video-card-image">
-                                    <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                                    <a href="#"><img class="img-fluid" src="img/v3.png" alt=""></a>
-                                    <div class="time">3:50</div>
-                                </div>
-                                <div class="video-card-body">
-                                    <div class="btn-group float-right right-action">
-                                        <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
-                                        </div>
-                                    </div>
-                                    <div class="video-title">
-                                        <a href="#">Culpa qui officia deserunt mollit anim</a>
-                                    </div>
-                                    <div class="video-page text-success">
-                                        Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                                    </div>
-                                    <div class="video-view">
-                                        1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="video-card video-card-list">
-                                <div class="video-card-image">
-                                    <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                                    <a href="#"><img class="img-fluid" src="img/v4.png" alt=""></a>
-                                    <div class="time">3:50</div>
-                                </div>
-                                <div class="video-card-body">
-                                    <div class="btn-group float-right right-action">
-                                        <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
-                                        </div>
-                                    </div>
-                                    <div class="video-title">
-                                        <a href="#">Deserunt mollit anim id est laborum.</a>
-                                    </div>
-                                    <div class="video-page text-success">
-                                        Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                                    </div>
-                                    <div class="video-view">
-                                        1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="video-card video-card-list">
-                                <div class="video-card-image">
-                                    <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                                    <a href="#"><img class="img-fluid" src="img/v5.png" alt=""></a>
-                                    <div class="time">3:50</div>
-                                </div>
-                                <div class="video-card-body">
-                                    <div class="btn-group float-right right-action">
-                                        <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
-                                        </div>
-                                    </div>
-                                    <div class="video-title">
-                                        <a href="#">Exercitation ullamco laboris nisi ut.</a>
-                                    </div>
-                                    <div class="video-page text-success">
-                                        Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                                    </div>
-                                    <div class="video-view">
-                                        1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="video-card video-card-list">
-                                <div class="video-card-image">
-                                    <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                                    <a href="#"><img class="img-fluid" src="img/v6.png" alt=""></a>
-                                    <div class="time">3:50</div>
-                                </div>
-                                <div class="video-card-body">
-                                    <div class="btn-group float-right right-action">
-                                        <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
-                                        </div>
-                                    </div>
-                                    <div class="video-title">
-                                        <a href="#">There are many variations of passages of Lorem</a>
-                                    </div>
-                                    <div class="video-page text-success">
-                                        Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                                    </div>
-                                    <div class="video-view">
-                                        1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="adblock mt-0">
-                                <div class="img">
-                                    Google AdSense<br>
-                                    336 x 280
-                                </div>
-                            </div>
-                            <div class="video-card video-card-list">
-                                <div class="video-card-image">
-                                    <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                                    <a href="#"><img class="img-fluid" src="img/v1.png" alt=""></a>
-                                    <div class="time">3:50</div>
-                                </div>
-                                <div class="video-card-body">
-                                    <div class="btn-group float-right right-action">
-                                        <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
-                                        </div>
-                                    </div>
-                                    <div class="video-title">
-                                        <a href="#">Here are many variati of passages of Lorem</a>
-                                    </div>
-                                    <div class="video-page text-success">
-                                        Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                                    </div>
-                                    <div class="video-view">
-                                        1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="video-card video-card-list">
-                                <div class="video-card-image">
-                                    <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                                    <a href="#"><img class="img-fluid" src="img/v2.png" alt=""></a>
-                                    <div class="time">3:50</div>
-                                </div>
-                                <div class="video-card-body">
-                                    <div class="btn-group float-right right-action">
-                                        <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
-                                        </div>
-                                    </div>
-                                    <div class="video-title">
-                                        <a href="#">Duis aute irure dolor in reprehenderit in.</a>
-                                    </div>
-                                    <div class="video-page text-success">
-                                        Education  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                                    </div>
-                                    <div class="video-view">
-                                        1.8M views &nbsp;<i class="fas fa-calendar-alt"></i> 11 Months ago
-                                    </div>
-                                </div>
-                            </div>
+
+                            </Virtualize>
+                           
+                           
                         </div>
                     </div>
                 </div>
@@ -400,6 +207,9 @@
     </div>
 </div>
 @code {
+    Dictionary<long,bool> Liked { set; get; } = new();
+    Dictionary<long,bool> UnLiked { set; get; } = new();
+
     string NewComment = string.Empty;
     public List<string> VideoUrl { get; set; } = new();
     [Parameter]
@@ -479,7 +289,27 @@
         StateHasChanged();
     }
 
+    async Task UnLikeComment(PostComment item)
+    {
+        if (UnLiked.ContainsKey(item.Id) && UnLiked[item.Id])
+        {
+            toastService.ShowWarning("Anda sudah pernah unlike komentar ini.");
+            return;
+        }
+        UnLiked[item.Id] = true;
+        PostCommentSvc.UnLikeComment(SelUser.Id, SelUser.Username, item.Id);
+    }
 
+    async Task LikeComment(PostComment item)
+    {
+        if(Liked.ContainsKey(item.Id) && Liked[item.Id])
+        {
+            toastService.ShowWarning("Anda sudah pernah like komentar ini.");
+            return;
+        }
+        Liked[item.Id] = true;
+        PostCommentSvc.LikeComment(SelUser.Id,SelUser.Username, item.Id);
+    }
 
     async void LoadData()
     {
@@ -490,6 +320,13 @@
         ListOtherVideo = PostSvc.GetSimilar(CurrentVideo);
         VideoUrl.Clear();
         VideoUrl.Add(CurrentVideo.VideoUrls);
+        Liked.Clear();
+        UnLiked.Clear();
+        foreach(var comment in CurrentVideo.PostComments)
+        {
+            Liked.Add( comment.Id, comment.CommentLikes.Any(x=>x.LikedByUserId == SelUser.Id) );
+            UnLiked.Add( comment.Id, comment.CommentUnlikes.Any(x=>x.UnlikedByUserId == SelUser.Id) );
+        }
     }
 
     async Task OpenChannel(Channel item)

@@ -27,6 +27,7 @@ namespace LayarTancep.Data
         public DbSet<Trending> Trendings { get; set; }     
         public DbSet<Subscribe> Subscribes { get; set; }     
         public DbSet<PostLike> PostLikes { get; set; }     
+        public DbSet<CommentUnlike> CommentUnlikes { get; set; }     
         public DbSet<PostView> PostViews { get; set; }     
         public DbSet<PostComment> PostComments { get; set; }     
         public DbSet<CommentLike> CommentLikes { get; set; }     

@@ -184,7 +184,7 @@ namespace LayarTancep.Models
         public Channel Channel { set; get; }
         public DateTime SubscribeDate { set; get; }
     }
-
+   
 
     [Table("postlike")]
     public class PostLike
@@ -234,6 +234,7 @@ namespace LayarTancep.Models
         public DateTime CreatedDate { set; get; }
         public UserProfile User { set; get; }
         public ICollection<CommentLike> CommentLikes { get; set; }
+        public ICollection<CommentUnlike> CommentUnlikes { get; set; }
 
         public string CommentLike { get; set; }
         public string CommentUnlike { get; set; }
@@ -252,6 +253,22 @@ namespace LayarTancep.Models
         public long LikedByUserId { set; get; }
         public string LikedByUserName { set; get; }
         public UserProfile LikedByUser { set; get; }
+        public DateTime CreatedDate { set; get; }
+    } 
+
+    [Table("commentunlike")]
+    public class CommentUnlike
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        public PostComment Comment { set; get; }
+        [ForeignKey("Comment")]
+        public long CommentId { set; get; }
+        [ForeignKey("UserProfile")]
+        public long UnlikedByUserId { set; get; }
+        public string UnlikedByUserName { set; get; }
+        public UserProfile UnlikedByUser { set; get; }
         public DateTime CreatedDate { set; get; }
     }
 
@@ -284,9 +301,10 @@ namespace LayarTancep.Models
         public UserProfile User { get; set; }
 
         public ICollection<PostLike> PostLikes { get; set; }
+      
         public ICollection<PostView> PostViews { get; set; }
         public ICollection<PostComment> PostComments { get; set; }
-        public ICollection<CommentLike> CommentLikes { get; set; }
+        
     }
 
     [Table("notification")]

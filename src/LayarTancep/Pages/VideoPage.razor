@@ -355,7 +355,10 @@
                 UnLiked.Add(comment.Id, comment.CommentUnlikes.Any(x => x.UnlikedByUserId == SelUser.Id));
             }
     }
-
+    protected override async Task OnParametersSetAsync()
+    {
+        LoadData();
+    }
     async Task OpenChannel(Channel item)
     {
         NavMgr.NavigateTo($"/single-channel/{item.Id}");

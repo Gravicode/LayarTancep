@@ -236,8 +236,7 @@ namespace LayarTancep.Models
         public ICollection<CommentLike> CommentLikes { get; set; }
         public ICollection<CommentUnlike> CommentUnlikes { get; set; }
 
-        public string CommentLike { get; set; }
-        public string CommentUnlike { get; set; }
+      
 
     }
     [Table("commentlike")]

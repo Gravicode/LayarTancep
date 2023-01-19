@@ -7,12 +7,13 @@ namespace LayarTancep.Data
 {
     public class AppConstants
     {
-        public static long MaxAllowedFileSize = 10 * 1024000;
+        public static long MaxAllowedFileSize = 500 * 1024000;
         public static string StorageEndpoint = "";
         public static string StorageAccess = "";
         public static string StorageSecret = "";
         public static string StorageBucket = "";
 
+        public static string FFMpegFolder = "";
         public static string UploadUrlPrefix = "https://storagemurahaje.blob.core.windows.net/LayarTancep";
         public const int FACE_WIDTH = 180;
         public const int FACE_HEIGHT = 135;

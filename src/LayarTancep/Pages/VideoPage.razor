@@ -10,7 +10,7 @@
 @inject PostService PostSvc
 @inject UserProfileService UserSvc
 
-
+@if (CurrentVideo != null) { 
 <div class="container-fluid pb-0">
     <div class="video-block-right-list section-padding">
         <div class="row mb-4">
@@ -67,7 +67,7 @@
                         <p class="mb-0"><i class="fas fa-eye"></i> @CurrentVideo?.PostViews.Count.ToString("n0") views</p>
                     </div>
                     <div class="single-video-author box mb-3">
-                        <div class="float-right"><button class="btn btn-danger" @onclick="ToggleSubscribe" type="button">@((Subscribed? "Subscribed": "Subscribe"))  <strong>@(CurrentChannel == null ? 0 : NumberHelper.FormatNumber(CurrentChannel.Subscribers.Count))</strong></button> <button class="btn btn @(Notified ? "btn-outline-success":"btn-outline-danger")" type="button" @onclick="ToggleNotification"><i class="fas fa-bell"></i></button></div>
+                        <div class="float-right"><button class="btn btn-danger" @onclick="ToggleSubscribe" type="button">@((Subscribed ? "Subscribed" : "Subscribe"))  <strong>@(CurrentChannel == null ? 0 : NumberHelper.FormatNumber(CurrentChannel.Subscribers.Count))</strong></button> <button class="btn btn @(Notified ? "btn-outline-success":"btn-outline-danger")" type="button" @onclick="ToggleNotification"><i class="fas fa-bell"></i></button></div>
                         <img class="img-fluid" src="@(string.IsNullOrEmpty(CurrentChannel.PicUrl)?"img/s4.png":CurrentChannel.PicUrl)" alt="">
                         <p><a href="#"><strong>@CurrentChannel.Name</strong></a> <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></span></p>
                         <small>Published on @CurrentVideo.CreatedDate.ToString("MMM dd, yyyy")</small>
@@ -93,48 +93,53 @@
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane fade show active" id="retro-comments" role="tabpanel" aria-labelledby="retro-comments-tab">
-                                <div class="reviews-members pt-0">
-                                    <div class="media">
-                                        <a href="#"><img class="mr-3" src="img/s1.png" alt="Generic placeholder image"></a>
-                                        <div class="media-body">
-                                            <div class="form-members-body">
-                                                <textarea rows="1" placeholder="Add a public comment..." class="form-control"></textarea>
-                                            </div>
-                                            <div class="form-members-footer text-right mt-2">
-                                                <b class="float-left">
-                                                    @CurrentVideo.PostComments.Count.ToString("n0") Comments
-                                                </b>
-                                                <button @onclick="ClearComment" class="btn btn-outline-danger btn-sm" type="button">CANCEL</button> <button @onclick="AddComment" class="btn btn-danger btn-sm" type="button">COMMENT</button>
+                                <AuthorizeView>
+                                    <Authorized>
+                                        <div class="reviews-members pt-0">
+                                            <div class="media">
+                                                <a href="#"><img class="mr-3" src="@(string.IsNullOrEmpty(SelUser?.PicUrl)?"img/s1.png":SelUser.PicUrl)" alt="Generic placeholder image"></a>
+                                                <div class="media-body">
+                                                    <div class="form-members-body">
+                                                        <textarea rows="1" @bind="NewComment" @onkeyup="KeyUp" placeholder="Add a public comment..." class="form-control"></textarea>
+                                                    </div>
+                                                    <div class="form-members-footer text-right mt-2">
+                                                        <b class="float-left">
+                                                            @CurrentVideo.PostComments.Count.ToString("n0") Comments
+                                                        </b>
+                                                        <button @onclick="ClearComment" class="btn btn-outline-danger btn-sm" type="button">CANCEL</button> <button @onclick="AddComment" class="btn btn-danger btn-sm" type="button">COMMENT</button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                @foreach(var comment in CurrentVideo.PostComments) { 
-                                <div class="reviews-members">
-                                    <div class="media">
-                                        <a href="#"><img class="mr-3" src="@(string.IsNullOrEmpty(comment.User.PicUrl)?"img/s2.png":comment.User.PicUrl)" alt="Generic placeholder image"></a>
-                                        <div class="media-body">
-                                            <div class="reviews-members-header">
-                                                <h6 class="mb-1"><a class="text-black" href="#">@comment.User.FullName </a> <small class="text-gray">@DateHelper.GetElapsedTime(comment.CreatedDate)</small></h6>
-                                            </div>
-                                            <div class="reviews-members-body">
-                                                <p> @comment.Comment</p>
-                                            </div>
-                                            <div class="reviews-members-footer">
+                                    </Authorized>
+                                </AuthorizeView>
+                                @foreach (var comment in CurrentVideo.PostComments)
+                                {
+                                    <div class="reviews-members">
+                                        <div class="media">
+                                            <a href="#"><img class="mr-3" src="@(string.IsNullOrEmpty(comment.User.PicUrl)?"img/s2.png":comment.User.PicUrl)" alt="Generic placeholder image"></a>
+                                            <div class="media-body">
+                                                <div class="reviews-members-header">
+                                                    <h6 class="mb-1"><a class="text-black" href="#">@comment.User.FullName </a> <small class="text-gray">@DateHelper.GetElapsedTime(comment.CreatedDate)</small></h6>
+                                                </div>
+                                                <div class="reviews-members-body">
+                                                    <p> @comment.Comment</p>
+                                                </div>
+                                                <div class="reviews-members-footer">
                                                     <a class="total-like" @onclick:preventDefault @onclick="()=>LikeComment(comment)" href="#"><i class="fas fa-thumbs-up"></i> @comment.CommentLikes.Count.ToString("n0")</a> <a class="total-like" @onclick:preventDefault @onclick="()=>UnLikeComment(comment)" href="#"><i class="fas fa-thumbs-down"></i> @comment.CommentUnlikes.Count.ToString("n0")</a>
-                                                <span dir="rtl" class="total-like-user-main ml-2">
-                                                    @if(comment.CommentLikes.Count>0)
-                                                            foreach(var commentlike in comment.CommentLikes.Take(4))
+                                                    <span dir="rtl" class="total-like-user-main ml-2">
+                                                        @if (comment.CommentLikes.Count > 0)
+                                                            foreach (var commentlike in comment.CommentLikes.Take(4))
                                                             {
                                                                 <a href="#" title="@commentlike.LikedByUser.FullName" data-placement="top" data-toggle="tooltip"><img class="total-like-user" src="@(string.IsNullOrEmpty(@commentlike.LikedByUser.PicUrl)?"img/s1.png":@commentlike.LikedByUser.PicUrl)" alt="Generic placeholder image"></a>
                                                             }
-                                                  
-                                                </span>
+
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                             }
+                                }
 
                             </div>
                         </div>
@@ -197,8 +202,8 @@
                                 </div>
 
                             </Virtualize>
-                           
-                           
+
+
                         </div>
                     </div>
                 </div>
@@ -206,9 +211,10 @@
         </div>
     </div>
 </div>
+}
 @code {
-    Dictionary<long,bool> Liked { set; get; } = new();
-    Dictionary<long,bool> UnLiked { set; get; } = new();
+    Dictionary<long, bool> Liked { set; get; } = new();
+    Dictionary<long, bool> UnLiked { set; get; } = new();
 
     string NewComment = string.Empty;
     public List<string> VideoUrl { get; set; } = new();
@@ -226,13 +232,21 @@
     public bool Notified { get; set; }
     bool HasLogin = false;
 
-    public Post CurrentVideo { get; set; }
+    public Post CurrentVideo { get; set; } = null;
 
     [CascadingParameter]
     public MainLayout Layout { get; set; }
     async Task ClearComment()
     {
         NewComment = string.Empty;
+    }
+    async Task KeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await AddComment();
+            //Console.WriteLine(this.Value);
+        }
     }
     async Task AddComment()
     {
@@ -247,6 +261,9 @@
             var res = PostCommentSvc.InsertData(newComment);
             if (res)
             {
+                //reload
+                ReloadVideo();
+                NewComment = string.Empty;
                 toastService.ShowSuccess("komentar ditambahkan.");
             }
         }
@@ -255,7 +272,10 @@
             toastService.ShowWarning("Isi komentarnya dulu ya.");
         }
     }
-
+    void ReloadVideo()
+    {
+        CurrentVideo = PostSvc.GetDataById(PostId);
+    }
     protected override async Task OnInitializedAsync()
     {
         var user = (await authenticationStateTask).User;
@@ -267,7 +287,7 @@
             HasLogin = true;
         }
 
-        if (PostId <= 0)
+        if (PostId <= 0 && SelUser!=null)
         {
             var myvideos = PostSvc.GetByUser(SelUser.Username);
             if (myvideos.Any()) PostId = myvideos.First().Id;
@@ -298,35 +318,42 @@
         }
         UnLiked[item.Id] = true;
         PostCommentSvc.UnLikeComment(SelUser.Id, SelUser.Username, item.Id);
+        ReloadVideo();
     }
 
     async Task LikeComment(PostComment item)
     {
-        if(Liked.ContainsKey(item.Id) && Liked[item.Id])
+        if (Liked.ContainsKey(item.Id) && Liked[item.Id])
         {
             toastService.ShowWarning("Anda sudah pernah like komentar ini.");
             return;
         }
         Liked[item.Id] = true;
-        PostCommentSvc.LikeComment(SelUser.Id,SelUser.Username, item.Id);
+        PostCommentSvc.LikeComment(SelUser.Id, SelUser.Username, item.Id);
+        ReloadVideo();
     }
 
     async void LoadData()
     {
         CurrentVideo = PostSvc.GetDataById(PostId);
-        Subscribed = CurrentVideo.Channel.Subscribers.Any(x => x.UserId == SelUser.Id);
-        Notified = CurrentVideo.Channel.ChannelNotifications.Any(x => x.UserId == SelUser.Id);
-        ListVideo = CurrentVideo.Channel.Posts.ToList();
+        CurrentChannel = CurrentVideo.Channel;
+        if (SelUser != null)
+        {
+            Subscribed = CurrentVideo.Channel.Subscribers.Any(x => x.UserId == SelUser.Id);
+            Notified = CurrentVideo.Channel.ChannelNotifications.Any(x => x.UserId == SelUser.Id);
+        }
+        ListVideo = PostSvc.GetByChannel(CurrentChannel.Id);
         ListOtherVideo = PostSvc.GetSimilar(CurrentVideo);
         VideoUrl.Clear();
         VideoUrl.Add(CurrentVideo.VideoUrls);
         Liked.Clear();
         UnLiked.Clear();
-        foreach(var comment in CurrentVideo.PostComments)
-        {
-            Liked.Add( comment.Id, comment.CommentLikes.Any(x=>x.LikedByUserId == SelUser.Id) );
-            UnLiked.Add( comment.Id, comment.CommentUnlikes.Any(x=>x.UnlikedByUserId == SelUser.Id) );
-        }
+        if (SelUser != null)
+            foreach (var comment in CurrentVideo.PostComments)
+            {
+                Liked.Add(comment.Id, comment.CommentLikes.Any(x => x.LikedByUserId == SelUser.Id));
+                UnLiked.Add(comment.Id, comment.CommentUnlikes.Any(x => x.UnlikedByUserId == SelUser.Id));
+            }
     }
 
     async Task OpenChannel(Channel item)
@@ -355,6 +382,7 @@
         {
             ChannelSvc.UnSubscribe(SelUser.Id, CurrentChannel.Id);
         }
+        Subscribed = state;
     }
 
     async Task ToggleNotification()
@@ -378,7 +406,9 @@
         {
             ChannelSvc.UnsetNotification(SelUser.Id, CurrentChannel.Id);
         }
+        Notified = state;
     }
 
-}
+
+
 }

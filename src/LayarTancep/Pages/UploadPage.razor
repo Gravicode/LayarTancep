@@ -1,4 +1,5 @@
 ﻿@page "/upload"
+@using Xabe.FFmpeg;
 @inject IJSRuntime IJS
 @inject NavigationManager NavMgr
 @inject IToastService toastService
@@ -185,7 +186,8 @@ else
     string UserName;
     private decimal progressPercent;
     int ProgressPercent;
-    Emgu.CV.VideoCapture _capture;
+    //    Emgu.CV.VideoCapture _capture;
+    IMediaInfo mediaInfo;
     async Task CloseMessage()
     {
         IsFailed = false;
@@ -223,25 +225,44 @@ else
 
 
                 var bytes = ms.ToArray();
+
+                //get thumbnail
                 try
                 {
                     var pathToVideoFile = Path.GetTempFileName() + Path.GetExtension(file.Name);
-                    var screenShotFile = Path.GetTempFileName() + ".jpg";
+                    var screenShotFile = Path.GetTempFileName() + ".png";
                     File.WriteAllBytes(pathToVideoFile, bytes);
-                    _capture = new Emgu.CV.VideoCapture(pathToVideoFile);
-                    var frame = _capture.QueryFrame();
-                    frame.Save(screenShotFile);
-                    var ScreenShotName = $"Screenshot_{(string.IsNullOrEmpty(SelUser.Username) ? "rojul" : SelUser.Username)}_{Tools.NumberGen.GenerateNumber(5)}.jpg";
-                    var FileUrlImg = $"{AppConstants.UploadUrlPrefix}{ScreenShotName}";
-                    await AzureBlobHelper.UploadFile(ScreenShotName, bytes);
-                    DataPost.ImageUrls = FileUrlImg;
+                    mediaInfo = await FFmpeg.GetMediaInfo(pathToVideoFile);
+                    DataPost.Duration = mediaInfo.Duration;
+                    //IConversion conversion = await FFmpeg.Conversions.FromSnippet.Snapshot(pathToVideoFile, screenShotFile, TimeSpan.FromSeconds(0));
+                    //IConversionResult result = await conversion.Start();
+                    Func<string,string> outputFileNameBuilder = (number) => { return screenShotFile; };
+
+                    IVideoStream videoStream = mediaInfo.VideoStreams.First()?.SetCodec(VideoCodec.png);
+
+                    IConversionResult conversionResult = await FFmpeg.Conversions.New()
+                        .AddStream(videoStream)
+                        .ExtractNthFrame(10, outputFileNameBuilder)
+                        .Start();
+
+
+
+                    if (File.Exists(screenShotFile))
+                    {
+                        var ScreenShotName = $"Screenshot_{(string.IsNullOrEmpty(SelUser.Username) ? "rojul" : SelUser.Username)}_{UIDHelper.CreateNewUID()}.png";
+                        var imageBytes = File.ReadAllBytes(screenShotFile);
+                        var FileUrlImg = $"{AppConstants.UploadUrlPrefix}{ScreenShotName}";
+                        await AzureBlobHelper.UploadFile(ScreenShotName, imageBytes);
+                        DataPost.ImageUrls = FileUrlImg;
+                    }
+
                 }
                 catch (Exception ex)
                 {
-                    
+
                     Console.WriteLine(ex);
                 }
-              
+
 
                 string newName = string.Empty;
 
@@ -277,17 +298,17 @@ else
         ListChannel = ChannnelSvc.GetByUser(SelUser);
 
     }
-        /*
-        async Task AddTag()
-        {
-        if (string.IsNullOrEmpty(NewTag)) return;
-        Tags.Add(NewTag);
+    /*
+    async Task AddTag()
+    {
+    if (string.IsNullOrEmpty(NewTag)) return;
+    Tags.Add(NewTag);
     NewTag = string.Empty;
     }
 
     async Task RemoveTag(string Name)
-        {
-        Tags.Remove(Name);
+    {
+    Tags.Remove(Name);
     }
     */
     async Task Save()
@@ -356,7 +377,9 @@ else
 
                 toastService.ShowSuccess("Video berhasil di simpan.", "Info");
                 IsFailed = false;
-                DataPost = new() { UserId = SelUser.Id, UserName = SelUser.Username, CreatedDate = DateHelper.GetLocalTimeNow() };
+                DataPost = new() { UserId = SelUser.Id, UserName = SelUser.Username, CreatedDate = DateHelper.GetLocalTimeNow(), ImageUrls=string.Empty, VideoUrls=string.Empty };
+                Mode = UploadModes.SelectFile;
+                IsUploading = false;
             }
             else
             {

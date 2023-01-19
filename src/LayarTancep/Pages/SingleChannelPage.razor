@@ -152,7 +152,7 @@
             HasLogin = true;
         }
 
-        if (ChannelId <= 0)
+        if (ChannelId <= 0 && SelUser!=null)
         {
             var mychannels = ChannelSvc.GetByUser(SelUser);
             if (mychannels.Any()) ChannelId = mychannels.First().Id;
@@ -184,7 +184,8 @@
     async void LoadData()
     {
         CurrentChannel = ChannelSvc.GetDataById(ChannelId);
-        Subscribed = CurrentChannel.Subscribers.Any(x => x.UserId == SelUser.Id);
+        if (SelUser != null)
+            Subscribed = CurrentChannel.Subscribers.Any(x => x.UserId == SelUser.Id);
         await Search();
     }
 

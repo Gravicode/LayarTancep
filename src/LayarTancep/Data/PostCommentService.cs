@@ -85,9 +85,9 @@ namespace LayarTancep.Data
                 db.SaveChanges();
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
-
+                Console.WriteLine(ex);
             }
             return false;
 

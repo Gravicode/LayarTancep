@@ -1,4 +1,5 @@
 ﻿@page "/channels"
+@page "/channels/{Category}"
 @inject IJSRuntime IJS
 @inject NavigationManager NavMgr
 @inject IToastService toastService
@@ -32,7 +33,7 @@
 
                         </div>
                     </div>
-                    <h6>Channels</h6>
+                    <h6>Channels @(string.IsNullOrEmpty(Category)?"":$": {Category}")</h6>
                 </div>
             </div>
             <Virtualize Items="@ListChannel" Context="item">
@@ -120,6 +121,8 @@
 </ChannelDetail>
 
 @code {
+    [Parameter]
+    public string Category { get; set; }
     string customHeader = "Tambah Channel";
     public Channel itemObject { get; set; } = new();
     ChannelDetail detail;
@@ -168,14 +171,14 @@
 
     void LoadData()
     {
-        ListChannel = ChannelSvc.GetLatest(FilterChannel);
-        ListFeatured = PostSvc.GetFeatured(FilterFeatured);
+        ListChannel = string.IsNullOrEmpty(Category)? ChannelSvc.GetLatest(FilterChannel) : ChannelSvc.GetByCategory(Category,FilterChannel);
+        ListFeatured = string.IsNullOrEmpty(Category) ? PostSvc.GetFeatured(FilterFeatured) : PostSvc.GetByCategory(Category, FilterFeatured);
         Subscribed.Clear();
         if(!string.IsNullOrEmpty(UserName))
-        foreach (var channel in ListChannel)
-        {
-            Subscribed.Add(channel.Id, channel.Subscribers.Any(x => x.UserId == SelUser.Id));
-        }
+            foreach (var channel in ListChannel)
+            {
+                Subscribed.Add(channel.Id, channel.Subscribers.Any(x => x.UserId == SelUser.Id));
+            }
     }
 
     async Task OpenChannel(Channel item)

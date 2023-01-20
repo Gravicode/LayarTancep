@@ -37,7 +37,10 @@ namespace LayarTancep.Data
         {
             return db.Subscribes.OrderBy(x => x.Id).ToList();
         }
-
+        public List<Subscribe> GetAllData(string UserName)
+        {
+            return db.Subscribes.Include(c=>c.Channel).Where(x=>x.UserName == UserName).OrderBy(x => x.Id).ToList();
+        }
         public Subscribe GetDataById(object Id)
         {
             return db.Subscribes.Where(x => x.Id == (long)Id).FirstOrDefault();

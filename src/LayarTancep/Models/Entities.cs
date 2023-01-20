@@ -1,14 +1,38 @@
 ﻿using GemBox.Document;
+using GoogleMapsComponents.Maps;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.Design;
+using System.Diagnostics;
+using System.Drawing;
 using System.Reflection;
 
 namespace LayarTancep.Models
 {
     #region helpers model
+    public class ChannelCategories
+    {
+        public static string[] Categories = new string []{
+"Auto & Vehicle",
+"Comedy",
+"Education",
+"Entertainment",
+"Film & Animation",
+"Gaming",
+"HowTo & Style",
+"Music",
+"News & Politics",
+"NonProfits & Activism",
+"People & Blogs",
+"Pets & Animals",
+"Science & Technology",
+"Sports",
+"Travel & Events"
+        };
+    }
     public class ChannelCategoryCls
     {
         public string Category { get; set; }
@@ -383,6 +407,8 @@ namespace LayarTancep.Models
         public ICollection<ChannelNotification> ChannelNotifications { get; set; }
         public ICollection<ChannelView> ChannelViews { get; set; }
         public ICollection<History> MyHistory { get; set; }
+        public ICollection<Subscribe> Subscriptions { get; set; }
+
     }
 
     [Table("contact")]

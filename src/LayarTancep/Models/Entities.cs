@@ -14,6 +14,10 @@ using System.Reflection;
 namespace LayarTancep.Models
 {
     #region helpers model
+    public enum FooterTypes
+    {
+        Big, Small
+    }
     public class MonthBlog
     {
         public string Name { get; set; }
@@ -100,6 +104,15 @@ namespace LayarTancep.Models
         public bool IsSucceed { get; set; }
     }
     #endregion
+    [Table("newsletter_subscriber")]
+    public class NewsLetterSubscriber
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public string Email { get; set; }
+    }
     [Table("blog")]
     public class Blog
     {

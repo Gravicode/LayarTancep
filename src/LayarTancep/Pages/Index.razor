@@ -7,7 +7,7 @@
 @inject ChannelService ChannelSvc
 @inject PostService PostSvc
 @inject UserProfileService UserSvc
-
+@inject NotificationService NotificationSvc
 <PageTitle>LayarTancep - Tempat berbagi video asyik dan bermanfaat</PageTitle>
 <div class="container-fluid pb-0">
     <div class="top-mobile-search">
@@ -149,6 +149,10 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    public MainLayout Layout { get; set; }
+
+
     [Parameter]
     public string Keyword { get; set; }
     public string FilterChannel { get; set; } = FilterChannels.TopViewed;
@@ -246,16 +250,22 @@
         {
             ChannelSvc.UnSubscribe(SelUser.Id, item.Id);
         }
+        Subscribed[item.Id] = state;
+        var notif = new Notification() { Action = state ? "Subscribe" : "Unsubscribe", Message = $"{SelUser.FullName} {(state ? "Subscribe" : "Unsubscribe")} ke Channel {item.Name}", CreatedDate = DateHelper.GetLocalTimeNow(), IsRead = false, LinkDesc = "", LinkUrl = "#", UserId = SelUser.Id };
+        var res = NotificationSvc.InsertData(notif);
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await IJS.InvokeVoidAsync("LoadCarousel");
-
+            if (Layout != null)
+            {
+                Layout.SetFooter(FooterTypes.Big);
+            }
         }
 
         
     }
-
+   
 }

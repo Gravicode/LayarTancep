@@ -6,6 +6,7 @@
 @inject PostService PostSvc
 @inject UserProfileService UserSvc
 @inject SubscribeService SubscribeSvc
+@inject NotificationService NotificationSvc
 <div class="container-fluid">
     <div class="video-block section-padding">
 
@@ -154,5 +155,7 @@
             ChannelSvc.UnSubscribe(SelUser.Id, item.Id);
         }
         Subscribed[item.Id] = state;
+        var notif = new Notification() { Action = state ? "Subscribe" : "Unsubscribe", Message = $"{SelUser.FullName} {(state ? "Subscribe" : "Unsubscribe")} ke Channel {item.Name}", CreatedDate = DateHelper.GetLocalTimeNow(), IsRead = false, LinkDesc = "", LinkUrl = "#", UserId = SelUser.Id };
+        var res = NotificationSvc.InsertData(notif);
     }
 }

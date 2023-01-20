@@ -6,6 +6,7 @@
 @inject ChannelService ChannelSvc
 @inject PostService PostSvc
 @inject UserProfileService UserSvc
+@inject NotificationService NotificationSvc
 
 <div class="container-fluid pb-0">
     <div class="video-block section-padding">
@@ -139,7 +140,8 @@
     public List<Post> ListFeatured { get; set; } = new();
     public Dictionary<long, bool> Subscribed { get; set; } = new();
     bool HasLogin = false;
-
+    [CascadingParameter]
+    public MainLayout Layout { get; set; }
     private async void DataChanged()
     {
         LoadData();
@@ -157,6 +159,7 @@
             HasLogin = true;
         }
         LoadData();
+
     }
     protected override async Task OnParametersSetAsync()
     {
@@ -214,6 +217,8 @@
         {
             ChannelSvc.UnSubscribe(SelUser.Id, item.Id);
         }
+        var notif = new Notification() { Action = state ? "Subscribe" : "Unsubscribe", Message = $"{SelUser.FullName} {(state ? "Subscribe" : "Unsubscribe")} ke Channel {item.Name}", CreatedDate = DateHelper.GetLocalTimeNow(), IsRead = false, LinkDesc = "", LinkUrl = "#", UserId = SelUser.Id };
+        var res = NotificationSvc.InsertData(notif);
         Subscribed[item.Id] = state;
     }
     private void PrepareForEdit(Channel item)
@@ -222,8 +227,20 @@
         itemObject = item;
 
     }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await IJS.InvokeVoidAsync("LoadCarousel");
+            if (Layout != null)
+            {
+                Layout.SetFooter(FooterTypes.Small);
+            }
+        }
+    }
     async Task AddNewChannel()
     {
+        
         customHeader = "Tambah Channel";
         itemObject = new Channel();
         itemObject.CreatedDate = DateHelper.GetLocalTimeNow();

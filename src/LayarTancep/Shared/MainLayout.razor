@@ -19,7 +19,15 @@
 
         <!-- /.container-fluid -->
         <!-- Sticky Footer -->
-       <FooterPage></FooterPage>
+        @if(FooterType == FooterTypes.Big)
+        {
+            <FooterPage></FooterPage>
+        }
+        else
+        {
+            <FooterSmall></FooterSmall>
+        }
+       
     </div>
     <!-- /.content-wrapper -->
 </div>
@@ -55,6 +63,7 @@
                 ErrorIconClass="fa fa-bug" />
 <PageCounter></PageCounter>
 @code {
+    FooterTypes FooterType { get; set; } = FooterTypes.Small;
     [Parameter]
     public string AdditionalCss { get; set; }
 
@@ -70,6 +79,11 @@
         //NavMgr.NavigateTo($"/login");
     }
 
+    public void SetFooter(FooterTypes ftype)
+    {
+        this.FooterType = ftype;
+        StateHasChanged();
+    }
 
     string Nama = "Saya";
     protected override async Task OnInitializedAsync()

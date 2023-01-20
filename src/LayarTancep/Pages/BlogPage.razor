@@ -157,6 +157,8 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    public MainLayout Layout { get; set; }
     public List<string> ListCategory { get; set; } = new();
     public List<string> ListTag { get; set; } = new();
     public List<MonthBlog> ListMonth { get; set; } = new();
@@ -263,5 +265,16 @@
             group p by p.Name into g
             select new MonthBlog { Name = g.Key, Month = g.First().Month, Year = g.First().Year }
             ).ToList();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await IJS.InvokeVoidAsync("LoadCarousel");
+            if (Layout != null)
+            {
+                Layout.SetFooter(FooterTypes.Small);
+            }
+        }
     }
 }

@@ -20,6 +20,7 @@ namespace LayarTancep.Data
         {
         }
     
+        public DbSet<NewsLetterSubscriber> NewsLetterSubscribers { get; set; }
         public DbSet<Blog> Blogs { get; set; }
         public DbSet<BlogComment> BlogComments { get; set; }
         public DbSet<PageView> PageViews { get; set; }

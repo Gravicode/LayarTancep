@@ -7,7 +7,7 @@
 @inject ChannelService ChannelSvc
 @inject PostService PostSvc
 @inject UserProfileService UserSvc
-
+@inject NotificationService NotificationSvc
 
 <div class="single-channel-image">
     <img class="img-fluid" alt="" src="@(string.IsNullOrEmpty(CurrentChannel?.BackgroundPicUrl)?"img/channel-banner.png":CurrentChannel.BackgroundPicUrl)">
@@ -123,6 +123,7 @@
 </div>
 @code {
 
+
     public string Keyword { get; set; }
     public Channel itemObject { get; set; } = new();
     public UserProfile SelUser { get; set; }
@@ -192,7 +193,17 @@
         LoadData();
         StateHasChanged();
     }
-
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await IJS.InvokeVoidAsync("LoadCarousel");
+            if (Layout != null)
+            {
+                Layout.SetFooter(FooterTypes.Small);
+            }
+        }
+    }
 
 
     async void LoadData()
@@ -229,6 +240,9 @@
         {
             ChannelSvc.UnSubscribe(SelUser.Id, CurrentChannel.Id);
         }
+        Subscribed = state;
+        var notif = new Notification() { Action = state ? "Subscribe" : "Unsubscribe", Message = $"{SelUser.FullName} {(state ? "Subscribe" : "Unsubscribe")} ke Channel {CurrentChannel.Name}", CreatedDate = DateHelper.GetLocalTimeNow(), IsRead = false, LinkDesc = "", LinkUrl = "#", UserId = SelUser.Id };
+        var res = NotificationSvc.InsertData(notif);
     }
 
     async Task Search()

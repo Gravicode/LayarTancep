@@ -10,7 +10,7 @@
 @inject PostService PostSvc
 @inject UserProfileService UserSvc
 @inject HistoryService HistorySvc
-
+@inject NotificationService NotificationSvc
 @if (CurrentVideo != null)
 {
     <div class="container-fluid pb-0">
@@ -18,7 +18,7 @@
             <div class="row mb-4">
                 <div class="col-md-8">
                     <div class="single-video">
-                        <VideoPlayer VideoUrls="@VideoUrl" PosterUrl="@CurrentVideo?.ImageUrls"></VideoPlayer>
+                        <VideoPlayer @ref="player" VideoUrls="@VideoUrl" PosterUrl="@CurrentVideo?.ImageUrls"></VideoPlayer>
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -216,9 +216,11 @@
     </div>
 }
 @code {
+   
+    VideoPlayer player;
     Dictionary<long, bool> Liked { set; get; } = new();
     Dictionary<long, bool> UnLiked { set; get; } = new();
-
+    BlazorTimer timer;
     string NewComment = string.Empty;
     public List<string> VideoUrl { get; set; } = new();
     [Parameter]
@@ -296,7 +298,26 @@
         {
             var res =HistorySvc.Hit(CurrentVideo,SelUser,new TimeSpan(0,0,0));
         }
-
+        /*
+        timer=new  BlazorTimer ();
+        timer.SetTimer(5000);
+        timer.OnElapsed += () =>
+        {
+            try
+        {
+                if (CurrentVideo != null && player!=null)
+                {
+                    dynamic time = IJS.InvokeAsync<string>("GetCurrentTimeVideo",player.VideoId);
+                    var res = HistorySvc.Hit(CurrentVideo, SelUser, new TimeSpan(0, 0, 0));
+                }
+            }
+        catch (Exception)
+        {
+            
+            throw;
+        }
+           
+        };*/
     }
     void Preload()
     {
@@ -399,6 +420,8 @@
             ChannelSvc.UnSubscribe(SelUser.Id, CurrentChannel.Id);
         }
         Subscribed = state;
+        var notif = new Notification() { Action = state ? "Subscribe" : "Unsubscribe", Message = $"{SelUser.FullName} {(state ? "Subscribe" : "Unsubscribe")} ke Channel {CurrentChannel.Name}", CreatedDate = DateHelper.GetLocalTimeNow(), IsRead = false, LinkDesc = "", LinkUrl = "#", UserId = SelUser.Id };
+        var res = NotificationSvc.InsertData(notif);
     }
 
     async Task ToggleNotification()
@@ -424,7 +447,17 @@
         }
         Notified = state;
     }
-
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await IJS.InvokeVoidAsync("LoadCarousel");
+            if (Layout != null)
+            {
+                Layout.SetFooter(FooterTypes.Small);
+            }
+        }
+    }
 
 
 }

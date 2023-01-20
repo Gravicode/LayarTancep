@@ -69,9 +69,16 @@
     <!-- Page level custom scripts -->
 
     <script>
-
+        var player = null;
+        function GetCurrentTimeVideo(videoid){
+            if( player!=null){
+                var whereYouAt = player.currentTime;
+                return whereYouAt;
+            }
+            return "";
+        }
         function SetVideoFluid(videoid){
-            var player = videojs(videoid);
+            player = videojs(videoid);
             player.fill(true);
             player.fluid(true);
             player.responsive(true);

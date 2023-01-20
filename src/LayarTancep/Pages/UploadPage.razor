@@ -160,6 +160,10 @@ else
     </div>
 }
 @code {
+    [CascadingParameter]
+    public MainLayout Layout { get; set; }
+
+   
     public List<Channel> ListChannel { get; set; }
     public IBrowserFile CurrentVideo { get; set; }
     public enum UploadModes { SelectFile, Upload }
@@ -382,5 +386,16 @@ else
     {
         if (!string.IsNullOrEmpty(url))
             await IJS.InvokeVoidAsync("OpenUrl", url);
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await IJS.InvokeVoidAsync("LoadCarousel");
+            if (Layout != null)
+            {
+                Layout.SetFooter(FooterTypes.Small);
+            }
+        }
     }
 }

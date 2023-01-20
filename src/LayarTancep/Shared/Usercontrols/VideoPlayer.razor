@@ -1,9 +1,9 @@
-﻿<video id="@VideoId"
+﻿@inject IJSRuntime IJS
+<video id="@VideoId"
        class="video-js"
        controls
        preload="auto"
-       width="640"
-       height="315"
+    
        poster="@PosterUrl"
        data-setup="{}">
        
@@ -22,10 +22,22 @@
     </p>
 </video>
 @code {
-    public string VideoId { get; set; } = "my-video";
+    //SetVideoFluid
+    public string VideoId { get; set; } = $"my-video-{Tools.NumberGen.GenerateNumber(5)}";
     [Parameter]
     public string PosterUrl { get; set; } = "MY_VIDEO_POSTER.jpg";
     [Parameter]
     public List<string> VideoUrls { get; set; } = new() { };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+
+
+        if (firstRender)
+        {
+            await IJS.InvokeVoidAsync("SetVideoFluid", VideoId);
+        }
+
+    }
 }
 

@@ -2,30 +2,30 @@
 @inject IJSRuntime IJS
 @inject NavigationManager NavMgr
 @inject IToastService toastService
-
+@inject ContactService ContactSvc
+@inject UserProfileService UserSvc
 <div class="container-fluid">
     <!-- Contact Us -->
     <section class="section-padding">
         <div>
             <div class="row">
                 <div class="col-lg-4 col-md-4">
-                    <h3 class="mt-1 mb-4">Get In Touch</h3>
-                    <h6 class="text-dark">Address :</h6>
-                    <p>86 Petersham town, New South wales Waedll Steet, Australia PA 6550</p>
+                    <h3 class="mt-1 mb-4">Hubungi Kami</h3>
+                    <h6 class="text-dark">Alamat :</h6>
+                    <p>Jl Melati 22A Taman Cimanggu Bogor</p>
                     <h6 class="text-dark">Phone :</h6>
-                    <p>+91 12345-67890, (+91) 123 456 7890</p>
-                    <h6 class="text-dark">Mobile :</h6>
-                    <p>(+20) 220 145 6589, +91 12345-67890</p>
+                    <p>+62 0812-1996-4496</p>
+                   
                     <h6 class="text-dark">Email :</h6>
-                    <p>iamosahan@gmail.com, info@gmail.com</p>
+                    <p>layartancep@gmail.com</p>
                     <h6 class="text-dark">Website :</h6>
-                    <p>www.askbootstrap.com</p>
+                    <p>studios.gravicode.com</p>
 
                 </div>
                 <div class="col-lg-8 col-md-8">
                     <div class="card">
                         <div class="card-body">
-                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d109552.19658195564!2d75.78663251672796!3d30.900473637371658!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391a837462345a7d%3A0x681102348ec60610!2sLudhiana%2C+Punjab!5e0!3m2!1sen!2sin!4v1530462134939" width="100%" height="340" frameborder="0" style="border:0" allowfullscreen></iframe>
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63424.50638686182!2d106.74457519278025!3d-6.5176779430558!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69c584b8d9acd1%3A0x1838d5ed495ccad0!2sBMSpace%20(Co-working%20%26%20Makerspace)!5e0!3m2!1sid!2sid!4v1674203423995!5m2!1sid!2sid" width="100%" height="340" frameborder="0" style="border:0" allowfullscreen></iframe>
                         </div>
                     </div>
                 </div>
@@ -39,39 +39,59 @@
         <div>
             <div class="row">
                 <div class="col-lg-12 col-md-12 section-title text-left mb-4">
-                    <h2>Contact Us</h2>
+                    <h2>Hubungi Kami</h2>
                 </div>
                 <form class="col-lg-12 col-md-12" name="sentMessage" id="contactForm" novalidate>
                     <div class="control-group form-group">
                         <div class="controls">
-                            <label>Full Name <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Full Name" class="form-control" id="name" required data-validation-required-message="Please enter your name.">
+                            <label>Nama Lengkap <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="Full Name" @bind="NewContact.FullName" class="form-control" id="name" required data-validation-required-message="Please enter your name.">
                             <p class="help-block"></p>
                         </div>
                     </div>
                     <div class="row">
                         <div class="control-group form-group col-md-6">
-                            <label>Phone Number <span class="text-danger">*</span></label>
+                            <label>No Telepon <span class="text-danger">*</span></label>
                             <div class="controls">
-                                <input type="tel" placeholder="Phone Number" class="form-control" id="phone" required data-validation-required-message="Please enter your phone number.">
+                                <input type="tel" @bind="NewContact.Phone" placeholder="Phone Number" class="form-control" id="phone" required data-validation-required-message="Please enter your phone number.">
                             </div>
                         </div>
                         <div class="control-group form-group col-md-6">
                             <div class="controls">
-                                <label>Email Address <span class="text-danger">*</span></label>
-                                <input type="email" placeholder="Email Address" class="form-control" id="email" required data-validation-required-message="Please enter your email address.">
+                                <label>Email Anda <span class="text-danger">*</span></label>
+                                <input type="email" @bind="NewContact.Email" placeholder="Email Address" class="form-control" id="email" required data-validation-required-message="Please enter your email address.">
                             </div>
                         </div>
                     </div>
                     <div class="control-group form-group">
                         <div class="controls">
-                            <label>Message <span class="text-danger">*</span></label>
-                            <textarea rows="4" cols="100" placeholder="Message" class="form-control" id="message" required data-validation-required-message="Please enter your message" maxlength="999" style="resize:none"></textarea>
+                            <label>Pesan <span class="text-danger">*</span></label>
+                            <textarea @bind="NewContact.Message" rows="4" cols="100" placeholder="Pesan Anda" class="form-control" id="message" required data-validation-required-message="Please enter your message" maxlength="999" style="resize:none"></textarea>
                         </div>
                     </div>
-                    <div id="success"></div>
+                    @if (IsSucceed)
+                    {
+
+
+                        <div id="success">
+                            <div class="text-center mb-3">
+                                <div class="fw-bolder">Pesan tersimpan!</div>
+                            </div>
+                        </div>
+                    }
+                    else if(!string.IsNullOrEmpty(ErrorMsg))
+                    {
+                        <!-- Submit error message-->
+                        <!---->
+                        <!-- This is what your users will see when there is-->
+                        <!-- an error submitting the form-->
+                        <div class="alert alert-warning">
+                            <div class="text-center text-danger mb-3">Gagal menyimpan pesan!</div>
+                        </div>
+                    }
+               
                     <!-- For success/fail messages -->
-                    <button type="submit" class="btn btn-success">Send Message</button>
+                    <button type="button" @onclick="Simpan" class="btn btn-success">Kirim</button>
                 </form>
             </div>
         </div>
@@ -79,5 +99,77 @@
     <!-- End Contact Me -->
 </div>
 @code {
+    UserProfile DataUser;
+    public Contact NewContact { get; set; } = new();
+    string RetypePass;
+    string ErrorMsg = string.Empty;
+    bool RegisterSuccess = false;
 
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    string UserName;
+    bool IsSucceed = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+            DataUser = UserSvc.GetItemByUsername(UserName);
+            NewContact.Email = DataUser.Email;
+            NewContact.FullName = DataUser.FullName;
+            NewContact.Phone = DataUser.Phone;
+
+        }
+        
+
+    }
+    void Simpan()
+    {
+        IsSucceed = false;
+        ErrorMsg = "";
+
+
+        if (string.IsNullOrEmpty(NewContact.Email))
+        {
+            ErrorMsg += "Tolong di isi email. ";
+
+        }
+        if (string.IsNullOrEmpty(NewContact.Phone))
+        {
+            ErrorMsg += "Tolong di isi no hp. ";
+
+        }
+        if (string.IsNullOrEmpty(NewContact.FullName))
+        {
+            ErrorMsg += "Tolong di isi nama lengkap. ";
+
+        }
+        if (string.IsNullOrEmpty(NewContact.Message))
+        {
+            ErrorMsg += "Tolong di isi pesan. ";
+
+        }
+
+
+        if (ErrorMsg.Length > 0)
+        {
+            toastService.ShowWarning(ErrorMsg, "Perhatian");
+            return;
+        }
+        NewContact.CreatedDate = DateHelper.GetLocalTimeNow();
+        if (ContactSvc.InsertData(NewContact))
+        {
+            toastService.ShowSuccess("Pesan Anda sudah di terima, nuhun.", "Info");
+            IsSucceed = true;
+        }
+
+    }
+
+    void Kembali()
+    {
+        NavMgr.NavigateTo("/");
+    }
 }

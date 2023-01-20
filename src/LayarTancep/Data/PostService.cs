@@ -199,7 +199,7 @@ namespace LayarTancep.Data
         public List<Post> GetSimilar(Post item)
         {
             var datas = db.Posts.Include(c => c.PostViews).Include(c => c.PostLikes).Include(c => c.PostComments).Where(x => x.Category == item.Category).OrderBy(x => x.Id).ToList();
-            if (datas.Count > 0)
+            if (datas.Count > 0 && !string.IsNullOrEmpty(item.Tag))
             {
                 var tags = item.Tag.Split(",");
                 if (tags.Length > 0)
@@ -235,6 +235,18 @@ namespace LayarTancep.Data
             else
             {
                 return db.Posts.Include(c => c.PostLikes).Include(c => c.PostViews).OrderByDescending(x => x.PostLikes.Count).ThenByDescending(x => x.CreatedDate).Take(Limit).ToList();
+            }
+        } 
+        
+        public List<Post> GetAllData(string Filter, string UserName, int Limit = 1000)
+        {
+            if (Filter == FilterChannels.TopViewed)
+            {
+                return db.Posts.Include(c => c.PostViews).Where(x=>x.UserName == UserName).OrderByDescending(x => x.PostViews.Count).ThenByDescending(x => x.CreatedDate).Take(Limit).ToList();
+            }
+            else
+            {
+                return db.Posts.Include(c => c.PostLikes).Include(c => c.PostViews).Where(x => x.UserName == UserName).OrderByDescending(x => x.PostLikes.Count).ThenByDescending(x => x.CreatedDate).Take(Limit).ToList();
             }
         }
 

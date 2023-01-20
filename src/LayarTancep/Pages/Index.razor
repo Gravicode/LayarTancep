@@ -43,22 +43,25 @@
             </div>
             <div class="col-md-12">
                 <div class="owl-carousel owl-carousel-category">
-                    <Virtualize Items="@ListCategoryChannel" Context="item">
-                        <div @key="item.Category" class="item">
+
+                    @foreach (var item in ListCategoryChannel)
+                    {
+                        <div class="item">
                             <div class="category-item">
                                 <a href="@($"/channels/{item.Category}")">
                                     <img class="img-fluid" src="@(string.IsNullOrEmpty(item.PicUrl)?"img/s1.png":item.PicUrl)" alt="">
                                     <h6>
-                                        @item.Category @if (item.Channels.Count > 100)
-                                    {
-                                        <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></span>
-                                    }
+                                        @item.Category
+                                        @if (item.Channels.Count > 100)
+                                        {
+                                            <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></span>
+                                        }
                                     </h6>
                                     <p>@item.Channels.Count.ToString("n0") channels</p>
                                 </a>
                             </div>
                         </div>
-                    </Virtualize>
+                    }
                 </div>
             </div>
         </div>
@@ -86,7 +89,7 @@
                         <div class="video-card-image">
                             <a class="play-icon" href="@($"video-page/{item.Id}")"><i class="fas fa-play-circle"></i></a>
                             <a href="@($"video-page/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.ImageUrls)?"img/v1.png":item.ImageUrls)" alt=""></a>
-                            <div class="time">@(item.Duration != null ? $"{item.Duration.Value.Hours}:{item.Duration.Value.Minutes}:{item.Duration.Value.Seconds}" : "00:00")</div>
+                            <div class="time">@(item.Duration != null ? $"{String.Format("{0:00}", item.Duration.Value.Hours)}:{String.Format("{0:00}", item.Duration.Value.Minutes)}:{String.Format("{0:00}", item.Duration.Value.Seconds)}" : "00:00")</div>
                         </div>
                         <div class="video-card-body">
                             <div class="video-title">
@@ -210,11 +213,11 @@
         ListFeatured = PostSvc.GetFeatured(FilterFeatured);
         ListPopularChannel = ChannelSvc.GetLatest(FilterChannel);
         Subscribed.Clear();
-        if(!string.IsNullOrEmpty(UserName))
-        foreach (var channel in ListPopularChannel)
-        {
-            Subscribed.Add(channel.Id, channel.Subscribers.Any(x => x.UserId == SelUser.Id));
-        }
+        if (!string.IsNullOrEmpty(UserName))
+            foreach (var channel in ListPopularChannel)
+            {
+                Subscribed.Add(channel.Id, channel.Subscribers.Any(x => x.UserId == SelUser.Id));
+            }
     }
 
     async Task OpenChannel(Channel item)
@@ -244,6 +247,15 @@
             ChannelSvc.UnSubscribe(SelUser.Id, item.Id);
         }
     }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await IJS.InvokeVoidAsync("LoadCarousel");
 
+        }
+
+        
+    }
 
 }

@@ -32,7 +32,7 @@
                             <a class="video-close" href="#"><i class="fas fa-times-circle"></i></a>
                             <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
                             <a href="@($"video-page/{item.Post.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.Post.ImageUrls)?"img/v1.png":item.Post.ImageUrls)" alt=""></a>
-                            <div class="time">@(item.Post.Duration != null ? $"{item.Post.Duration.Value.Hours}:{item.Post.Duration.Value.Minutes}:{item.Post.Duration.Value.Seconds}" : "00:00")</div>
+                            <div class="time">@(item.Post.Duration != null ? $"{String.Format("{0:00}", item.Post.Duration.Value.Hours)}:{String.Format("{0:00}", item.Post.Duration.Value.Minutes)}:{String.Format("{0:00}", item.Post.Duration.Value.Seconds)}" : "00:00")</div>
                         </div>
                         <div class="progress">
                             <div class="progress-bar" role="progressbar" style="width: @GetProgress(item.LastWatch,item.Post.Duration.Value)%;" aria-valuenow="@GetProgress(item.LastWatch,item.Post.Duration.Value)" aria-valuemin="0" aria-valuemax="100">@($"{item.LastWatch.Hours}:{item.LastWatch.Minutes}:{item.LastWatch.Seconds}")</div>

@@ -14,7 +14,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="osahan-area text-center mt-3">
-                            <button @onclick="AddNewChannel" data-toggle="modal" data-target="#taskModal" class="btn btn-outline-primary">Buat Baru</button>
+                            <button @onclick="AddNewChannel" data-toggle="modal" data-target="#taskModal" class="btn btn-outline-primary">Buat Channel Baru</button>
                         </div>
                     </div>
                 </div>
@@ -43,6 +43,9 @@
                         <div class="channels-card-image">
                             <a href="@($"/single-channel/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.PicUrl)?"img/s1.png":item.PicUrl)" alt=""></a>
                             <div class="channels-card-image-btn"><button type="button" @onclick="()=>ToggleSubscribe(item)" class="@((Subscribed.ContainsKey(item.Id) && Subscribed[item.Id]) ?  "btn btn-outline-secondary btn-sm" :"btn btn-outline-danger btn-sm" )"> @((Subscribed.ContainsKey(item.Id) && Subscribed[item.Id]) ? "Subscribed" : "Subscribe") <strong>@NumberHelper.FormatNumber(item.Subscribers.Count)</strong></button></div>
+                            @if(HasLogin && item.UserName == UserName){
+                                <div class="channels-card-image-btn"><button type="button" @onclick="(() => PrepareForEdit(item))" data-toggle="modal" data-target="#taskModal" class="btn btn-outline-success btn-sm"> Ubah </button></div>
+                            }
                         </div>
                         <div class="channels-card-body">
                             <div class="channels-title">
@@ -95,7 +98,7 @@
                         <div class="video-card-image">
                             <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
                             <a href="@($"video-page/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.ImageUrls)?"img/v5.png":item.ImageUrls)" alt=""></a>
-                            <div class="time">@(item.Duration != null ? $"{item.Duration.Value.Hours}:{item.Duration.Value.Minutes}:{item.Duration.Value.Seconds}" : "00:00")</div>
+                            <div class="time">@(item.Duration != null ? $"{String.Format("{0:00}", item.Duration.Value.Hours)}:{String.Format("{0:00}", item.Duration.Value.Minutes)}:{String.Format("{0:00}", item.Duration.Value.Seconds)}" : "00:00")</div>
                         </div>
                         <div class="video-card-body">
                             <div class="video-title">
@@ -155,6 +158,10 @@
         }
         LoadData();
     }
+    protected override async Task OnParametersSetAsync()
+    {
+        LoadData();
+    }
     public enum FilterTypes { Channel, Featured }
     void SetFilter(FilterTypes filterType, string Filter)
     {
@@ -207,10 +214,17 @@
         {
             ChannelSvc.UnSubscribe(SelUser.Id, item.Id);
         }
+        Subscribed[item.Id] = state;
     }
+    private void PrepareForEdit(Channel item)
+    {
+        customHeader = "Ubah Channel";
+        itemObject = item;
 
+    }
     async Task AddNewChannel()
     {
+        customHeader = "Tambah Channel";
         itemObject = new Channel();
         itemObject.CreatedDate = DateHelper.GetLocalTimeNow();
         itemObject.UserId = SelUser.Id;

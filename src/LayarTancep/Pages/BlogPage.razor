@@ -1,5 +1,10 @@
 ﻿@page "/blog"
+@page "/blog/{Keyword}"
+@page "/blog/tags/{Tag}"
+@page "/blog/category/{Category}"
 @inject IJSRuntime IJS
+@inject BlogService BlogSvc
+@inject UserProfileService service
 @inject NavigationManager NavMgr
 @inject IToastService toastService
 
@@ -23,67 +28,42 @@
                     </div>
                 </div>
                 <div class="col-md-8">
-                    <div class="card blog mb-4">
-                        <div class="blog-header">
-                            <a href="#"><img class="card-img-top" src="img/blog/1.png" alt="Card image cap"></a>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title"><a href="#">Aliquam euismod libero eu enim. Nulla nec felis sed leo.</a></h5>
-                            <div class="entry-meta">
-                                <ul class="tag-info list-inline">
-                                    <li class="list-inline-item"><a href="#"><i class="fas fa-calendar"></i>  March 6, 2020</a></li>
-                                    <li class="list-inline-item"><i class="fas fa-folder"></i> <a rel="category tag" href="#">Image</a></li>
-                                    <li class="list-inline-item"><i class="fas fa-tag"></i> <a rel="tag" href="#">envato</a>, <a rel="tag" href="#">sale</a>, <a rel="tag" href="#">shop</a> </li>
-                                    <li class="list-inline-item"><i class="fas fa-comment"></i> <a href="#">4 Comments</a></li>
-                                </ul>
+                    @if (LatestBlogs != null)
+                        @foreach (var item in LatestBlogs)
+                        {
+                            <div class="card blog mb-4">
+                                <div class="blog-header">
+                                    <a href="@($"blog-detail/{item.Id}")"><img class="card-img-top" src="@(string.IsNullOrEmpty(item.ImageUrl)?"img/blog/1.png":item.ImageUrl)" alt="Card image cap"></a>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title"><a href="@($"blog-detail/{item.Id}")">@item.Title</a></h5>
+                                    <div class="entry-meta">
+                                        <ul class="tag-info list-inline">
+                                            <li class="list-inline-item"><a href="#"><i class="fas fa-calendar"></i>  @item.CreatedDate.ToString("MMMM dd, yyyy")</a></li>
+                                            <li class="list-inline-item"><i class="fas fa-folder"></i> <a rel="category tag" href="#" @onclick="()=>SearchByCategory(item.Category)" @onclick:preventDefault>@item.Category</a></li>
+                                            <li class="list-inline-item">
+                                                <i class="fas fa-tag"></i>
+                                                @if (!string.IsNullOrEmpty(item.Tags))
+                                                    @foreach (var tag in item.Tags.Split(','))
+                                                    {
+                                                        <a rel="tag" href="#" @onclick="()=>SearchByTag(tag)" @onclick:preventDefault>@tag</a>
+
+                                                        @(",")
+                                                    }
+                                            </li>
+                                            <li class="list-inline-item"><i class="fas fa-comment"></i> <a href="#">@item.BlogComments.Count.ToString("n0") Comments</a></li>
+                                        </ul>
+                                    </div>
+                                    <p class="card-text">
+                                        @(item.Body.Length > 100 ? (MarkupString)item.Body.Substring(0, 100) : (MarkupString)item.Body)
+                                    </p>
+                                    <a href="@($"blog-detail/{item.Id}")">LANJUT BACA <span class="fas fa-chevron-right"></span></a>
+                                </div>
                             </div>
-                            <p class="card-text">
-                                Aliquam convallis sollicitudin purus. Praesent aliquam, enim at fermentum mollis, ligula massa adipiscing nisl, ac euismod nibh nisl eu lectus. Fusce vulputate sem at sapien. Vivamus leo. Aliquam euismod libero eu enim. Nulla nec felis sed leo placerat imperdiet. Aenean suscipit nulla in justo. Suspendisse cursus rutrum augue. Nulla tincidunt tincidunt mi. Lorem ipsum dolor
-                            </p>
-                            <a href="#">READ MORE <span class="fas fa-chevron-right"></span></a>
-                        </div>
-                    </div>
-                    <div class="card blog mb-4">
-                        <div class="blog-header">
-                            <a href="#"><img class="card-img-top" src="img/blog/2.png" alt="Card image cap"></a>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title"><a href="#">Aliquam euismod libero eu enim. Nulla nec felis sed leo.</a></h5>
-                            <div class="entry-meta">
-                                <ul class="tag-info list-inline">
-                                    <li class="list-inline-item"><a href="#"><i class="fas fa-calendar"></i>  March 6, 2020</a></li>
-                                    <li class="list-inline-item"><i class="fas fa-folder"></i> <a rel="category tag" href="#">Image</a></li>
-                                    <li class="list-inline-item"><i class="fas fa-tag"></i> <a rel="tag" href="#">envato</a>, <a rel="tag" href="#">sale</a>, <a rel="tag" href="#">shop</a> </li>
-                                    <li class="list-inline-item"><i class="fas fa-comment"></i> <a href="#">4 Comments</a></li>
-                                </ul>
-                            </div>
-                            <p class="card-text">
-                                Aliquam convallis sollicitudin purus. Praesent aliquam, enim at fermentum mollis, ligula massa adipiscing nisl, ac euismod nibh nisl eu lectus. Fusce vulputate sem at sapien. Vivamus leo. Aliquam euismod libero eu enim. Nulla nec felis sed leo placerat imperdiet. Aenean suscipit nulla in justo. Suspendisse cursus rutrum augue. Nulla tincidunt tincidunt mi. Lorem ipsum dolor
-                            </p>
-                            <a href="#">READ MORE <span class="fas fa-chevron-right"></span></a>
-                        </div>
-                    </div>
-                    <div class="card blog mb-4">
-                        <div class="blog-header">
-                            <a href="#"><img class="card-img-top" src="img/blog/3.png" alt="Card image cap"></a>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title"><a href="#">Aliquam euismod libero eu enim. Nulla nec felis sed leo.</a></h5>
-                            <div class="entry-meta">
-                                <ul class="tag-info list-inline">
-                                    <li class="list-inline-item"><a href="#"><i class="fas fa-calendar"></i>  March 6, 2020</a></li>
-                                    <li class="list-inline-item"><i class="fas fa-folder"></i> <a rel="category tag" href="#">Image</a></li>
-                                    <li class="list-inline-item"><i class="fas fa-tag"></i> <a rel="tag" href="#">envato</a>, <a rel="tag" href="#">sale</a>, <a rel="tag" href="#">shop</a> </li>
-                                    <li class="list-inline-item"><i class="fas fa-comment"></i> <a href="#">4 Comments</a></li>
-                                </ul>
-                            </div>
-                            <p class="card-text">
-                                Aliquam convallis sollicitudin purus. Praesent aliquam, enim at fermentum mollis, ligula massa adipiscing nisl, ac euismod nibh nisl eu lectus. Fusce vulputate sem at sapien. Vivamus leo. Aliquam euismod libero eu enim. Nulla nec felis sed leo placerat imperdiet. Aenean suscipit nulla in justo. Suspendisse cursus rutrum augue. Nulla tincidunt tincidunt mi. Lorem ipsum dolor
-                            </p>
-                            <a href="#">READ MORE <span class="fas fa-chevron-right"></span></a>
-                        </div>
-                    </div>
-                    <ul class="pagination justify-content-center mt-4 pagination-sm">
+                        }
+
+
+                    <ul style="display:none" class="pagination justify-content-center mt-4 pagination-sm">
                         <li class="page-item disabled">
                             <span class="page-link">Previous</span>
                         </li>
@@ -104,9 +84,9 @@
                     <div class="card sidebar-card mb-4">
                         <div class="card-body">
                             <div class="input-group">
-                                <input type="text" placeholder="Search For" class="form-control">
+                                <input type="text" @bind="Keyword" @onkeyup="KeyUp" placeholder="Search For" class="form-control">
                                 <div class="input-group-append">
-                                    <button type="button" class="btn btn-secondary">Search <i class="fas fa-arrow-right"></i></button>
+                                    <button type="button" class="btn btn-secondary" @onclick="LoadData">Search <i class="fas fa-arrow-right"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -115,11 +95,10 @@
                         <div class="card-body">
                             <h5 class="card-title mb-3">Categories</h5>
                             <ul class="sidebar-card-list">
-                                <li><a href="#"><i class="fas fa-chevron-right"></i> Audio</a></li>
-                                <li><a href="#"><i class="fas fa-chevron-right"></i> Gallery</a></li>
-                                <li><a href="#"><i class="fas fa-chevron-right"></i> Image</a></li>
-                                <li><a href="#"><i class="fas fa-chevron-right"></i> Uncategorized</a></li>
-                                <li><a href="#"><i class="fas fa-chevron-right"></i> Video</a></li>
+                                @foreach(var cat in ListCategory)
+                                {
+                                    <li><a href="#" @onclick="()=>SearchByCategory(cat)" @onclick:preventDefault><i class="fas fa-chevron-right"></i> @cat</a></li>
+                                }
                             </ul>
                         </div>
                     </div>
@@ -127,9 +106,11 @@
                         <div class="card-body">
                             <h5 class="card-title mb-3">Archives</h5>
                             <ul class="sidebar-card-list">
-                                <li><a href="#"><i class="fas fa-chevron-right"></i> December, 2017</a></li>
-                                <li><a href="#"><i class="fas fa-chevron-right"></i> November, 2017</a></li>
-                                <li><a href="#"><i class="fas fa-chevron-right"></i> October, 2017</a></li>
+                                @foreach(var mon in ListMonth)
+                                {
+                                    <li><a href="#" @onclick="()=>SearchByMonth(mon)" @onclick:preventDefault><i class="fas fa-chevron-right"></i> @mon.Name</a></li>
+                                }
+                          
                             </ul>
                         </div>
                     </div>
@@ -137,21 +118,17 @@
                         <div class="card-body">
                             <h5 class="card-title mb-3">Tags</h5>
                             <div class="tagcloud">
-                                <a class="tag-cloud-link" href="#">coupon</a>
-                                <a class="tag-cloud-link" href="#">deals</a>
-                                <a class="tag-cloud-link" href="#">discount</a>
-                                <a class="tag-cloud-link" href="#">envato</a>
-                                <a class="tag-cloud-link" href="#">gallery</a>
-                                <a class="tag-cloud-link" href="#">sale</a>
-                                <a class="tag-cloud-link" href="#">shop</a>
-                                <a class="tag-cloud-link" href="#">stores</a>
-                                <a class="tag-cloud-link" href="#">video</a>
-                                <a class="tag-cloud-link" href="#">vimeo</a>
-                                <a class="tag-cloud-link" href="#">youtube</a>
+                                @foreach (var tag in ListTag)
+                                {
+                                    <a class="tag-cloud-link" @onclick="()=>SearchByTag(tag)" @onclick:preventDefault href="#">@tag</a>
+                                 
+                                }
+                               
+                              
                             </div>
                         </div>
                     </div>
-                    <div class="card sidebar-card mb-4">
+                    <div style="display:none" class="card sidebar-card mb-4">
                         <div class="card-body">
                             <h5 class="card-title mb-4">Newsletter</h5>
                             <div class="input-group">
@@ -162,7 +139,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card sidebar-card mb-4">
+                    <div style="display:none" class="card sidebar-card mb-4">
                         <div class="card-body">
                             <h5 class="card-title mb-3">Meta</h5>
                             <ul class="sidebar-card-list">
@@ -180,5 +157,111 @@
 </div>
 
 @code {
+    public List<string> ListCategory { get; set; } = new();
+    public List<string> ListTag { get; set; } = new();
+    public List<MonthBlog> ListMonth { get; set; } = new();
+    UserProfile SelUser = new UserProfile();
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    string UserName;
+    public List<Blog> FeaturedBlogs { get; set; }
+    public List<Blog> TrendingBlogs { get; set; }
+    public List<Blog> LatestBlogs { get; set; }
+    [Parameter]
+    public string Keyword { get; set; }
 
+    [Parameter]
+    public string Tag { get; set; }
+    [Parameter]
+    public string Category { get; set; }
+
+    List<string> Tags = new();
+    protected override async Task OnInitializedAsync()
+    {
+
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+            SelUser = service.GetItemByUsername(UserName);
+
+        }
+        FeaturedBlogs = BlogSvc.GetFeatured();
+        TrendingBlogs = BlogSvc.GetTrending();
+        Tags = BlogSvc.GetTags();
+        LoadData();
+
+    }
+    private void KeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            //if (!string.IsNullOrWhiteSpace(Keyword))
+            {
+                Tag = string.Empty;
+                LoadData();
+            }
+        }
+    }
+    void SearchByTag(string tag)
+    {
+        Tag = tag;
+        Category = string.Empty;
+        LatestBlogs = BlogSvc.GetByTag(Tag);
+    }
+    void SearchByCategory(string Cat)
+    {
+        Category = Cat;
+        Tag = string.Empty;
+        LatestBlogs = BlogSvc.GetByCategory(Tag);
+    }
+    void SearchByMonth(MonthBlog item)
+    {
+        LatestBlogs = BlogSvc.GetByMonthYear(item.Month, item.Year);
+    }
+    void LoadData()
+    {
+        if (!string.IsNullOrEmpty(Tag))
+        {
+            SearchByTag(Tag);
+
+        }
+        else if (!string.IsNullOrEmpty(Category))
+        {
+
+            SearchByCategory(Category);
+        }
+        else
+        {
+            LatestBlogs = BlogSvc.GetLatest(Keyword);
+        }
+        var tagset = new HashSet<string>();
+        var categoryset = new HashSet<string>();
+        LatestBlogs.Select(x => x.Tags).ToList().ForEach(x =>
+        {
+            var tags = x.Split(',');
+            foreach (var tag in tags)
+                if (!tagset.Contains(tag.Trim()))
+                {
+                    tagset.Add(tag.Trim());
+                }
+
+        });
+        LatestBlogs.Select(x => x.Category).ToList().ForEach(category =>
+        {
+            if (!categoryset.Contains(category.Trim()))
+            {
+                categoryset.Add(category.Trim());
+            }
+        });
+        ListTag = tagset.ToList();
+        ListCategory = categoryset.ToList();
+        ListMonth = LatestBlogs.Select(x => new MonthBlog() { Name = x.CreatedDate.ToString("MMMM yyyy"), Month = x.CreatedDate.Month, Year = x.CreatedDate.Year }).ToList();
+        ListMonth = (
+            from p in ListMonth
+            group p by p.Name into g
+            select new MonthBlog { Name = g.Key, Month = g.First().Month, Year = g.First().Year }
+            ).ToList();
+    }
 }

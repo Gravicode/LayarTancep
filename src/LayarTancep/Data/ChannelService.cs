@@ -150,13 +150,51 @@ namespace LayarTancep.Data
             }
           
         }
+        
+        public List<Channel> GetAllData(string Filter,string UserName, int Limit=100)
+        {
+            if(Filter == FilterChannels.TopViewed)
+            {
+                return db.Channels.Include(c=>c.ChannelViews).Include(c => c.Subscribers).Where(x=>x.UserName == UserName).OrderByDescending(x=>x.ChannelViews.Count).ThenByDescending(x => x.CreatedDate).Take(Limit).ToList();
+            }
+            else
+            {
+                return db.Channels.Include(c => c.Subscribers).Where(x => x.UserName == UserName).OrderByDescending(x => x.Subscribers.Count).ThenByDescending(x => x.CreatedDate).Take(Limit).ToList();
+            }
+          
+        }
+
+        public bool IsChannelExist(string ChannelName)
+        {
+            var exist = db.Channels.Any(x => x.Name == ChannelName);
+            return exist;
+        }
+        public string GetAvailableName(string ChannelName)
+        {
+            var BaseName = ChannelName;
+            var count = 0;
+            do
+            {
+                var exist = db.Channels.Any(x => x.Name == ChannelName);
+                if (exist)
+                {
+                    ChannelName = $"{BaseName} #{count++}";
+                }
+                else
+                {
+                    break;
+                }
+                Thread.Sleep(100);
+            } while (true);
+            return ChannelName;
+        }
         public List<Channel> GetByUser(UserProfile user)
         {
             
             var datas =  db.Channels.Where(x=>x.UserName == user.Username).OrderBy(x => x.Name).ToList();
             if (!datas.Any())
             {
-                var newChannel = new Channel() { UserId = user.Id, UserName = user.Username, CreatedDate = DateHelper.GetLocalTimeNow(), Desc="Default Channel", Name = "My Videos", Category = "General"   };
+                var newChannel = new Channel() { UserId = user.Id, UserName = user.Username, CreatedDate = DateHelper.GetLocalTimeNow(), Desc="My Default Channel", Name = GetAvailableName( $"{user.FullName} Videos"), Category = ChannelCategories.Categories[0]   };
                 db.Channels.Add(newChannel);
                 db.SaveChanges();
                 datas = db.Channels.Where(x => x.UserName == user.Username).OrderBy(x => x.Name).ToList();

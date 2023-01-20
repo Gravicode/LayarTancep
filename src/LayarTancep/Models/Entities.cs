@@ -14,9 +14,16 @@ using System.Reflection;
 namespace LayarTancep.Models
 {
     #region helpers model
+    public class MonthBlog
+    {
+        public string Name { get; set; }
+        public int Month { get; set; }
+        public int Year { get; set; }
+    }
     public class ChannelCategories
     {
         public static string[] Categories = new string []{
+"General",
 "Auto & Vehicle",
 "Comedy",
 "Education",
@@ -93,6 +100,43 @@ namespace LayarTancep.Models
         public bool IsSucceed { get; set; }
     }
     #endregion
+    [Table("blog")]
+    public class Blog
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        public string Uid { set; get; }
+        [ForeignKey(nameof(User)), Column(Order = 0)]
+        public long UserId { set; get; }
+        public UserProfile User { set; get; }
+        public DateTime CreatedDate { set; get; }
+        public string Body { set; get; }
+        public string Title { set; get; }
+        public string? Tags { set; get; }
+        public string? Category { set; get; }
+        public string? ImageUrl { set; get; }
+        public bool Featured { get; set; } = false;
+
+        public ICollection<BlogComment> BlogComments { get; set; }
+
+    }
+
+    [Table("blog_comment")]
+    public class BlogComment
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
+        [ForeignKey(nameof(Blog)), Column(Order = 0)]
+        public long BlogId { set; get; }
+        public Blog Blog { set; get; }
+        public string Name { set; get; }
+        public string Email { set; get; }
+        public string Comment { set; get; }
+        public DateTime CreatedDate { set; get; }
+    }
+
     [Table("page_view")]
     public class PageView
     {
@@ -176,6 +220,7 @@ namespace LayarTancep.Models
         public string? Desc { get; set; }
         public string Category { get; set; }
         public string? PicUrl { get; set; }
+        public string? BackgroundPicUrl { get; set; }
         public string? Facebook { get; set; }
         public string? Twitter { get; set; }
         public string? Google { get; set; }

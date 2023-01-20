@@ -69,6 +69,13 @@
     <!-- Page level custom scripts -->
 
     <script>
+
+        function SetVideoFluid(videoid){
+            var player = videojs(videoid);
+            player.fill(true);
+            player.fluid(true);
+            player.responsive(true);
+        }
         function OpenFileUpload(uploadid) {
 
             $('#' + uploadid + ':hidden').trigger('click');

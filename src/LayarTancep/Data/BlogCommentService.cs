@@ -8,59 +8,53 @@ using System.Threading.Tasks;
 
 namespace LayarTancep.Data
 {
-    public class SubscribeService : ICrud<Subscribe>
+    public class BlogCommentService : ICrud<BlogComment>
     {
         LayarTancepDB db;
 
-        public SubscribeService()
+        public BlogCommentService()
         {
             if (db == null) db = new LayarTancepDB();
 
         }
         public bool DeleteData(object Id)
         {
-            var selData = (db.Subscribes.Where(x => x.Id == (long)Id).FirstOrDefault());
-            db.Subscribes.Remove(selData);
+            var selData = (db.BlogComments.Where(x => x.Id == (long)Id).FirstOrDefault());
+            db.BlogComments.Remove(selData);
             db.SaveChanges();
             return true;
         }
 
-        public List<Subscribe> FindByKeyword(string Keyword)
+        public List<BlogComment> FindByKeyword(string Keyword)
         {
-            var data = from x in db.Subscribes.Include(c=>c.Channel)
-                       where x.Channel.Name.Contains(Keyword)
+            var data = from x in db.BlogComments
+                       where x.Comment.Contains(Keyword)
                        select x;
             return data.ToList();
         }
 
-        public List<Subscribe> GetAllData()
+        public List<BlogComment> GetAllData()
         {
-            return db.Subscribes.OrderBy(x => x.Id).ToList();
+            return db.BlogComments.OrderBy(x => x.Id).ToList();
         }
-        public List<Subscribe> GetAllData(string UserName)
+
+        public BlogComment GetDataById(object Id)
         {
-            return db.Subscribes.Include(c=>c.Channel).ThenInclude(c=>c.ChannelViews)
-                .Include(c => c.Channel).ThenInclude(c => c.Subscribers)
-                .Include(c => c.Channel).ThenInclude(c => c.Posts)
-                .Where(x=>x.UserName == UserName).OrderBy(x => x.Id).ToList();
-        }
-        public Subscribe GetDataById(object Id)
-        {
-            return db.Subscribes.Where(x => x.Id == (long)Id).FirstOrDefault();
+            return db.BlogComments.Where(x => x.Id == (long)Id).FirstOrDefault();
         }
 
 
-        public bool InsertData(Subscribe data)
+        public bool InsertData(BlogComment data)
         {
             try
             {
-                db.Subscribes.Add(data);
+                db.BlogComments.Add(data);
                 db.SaveChanges();
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
-
+                Console.WriteLine(ex);
             }
             return false;
 
@@ -68,7 +62,7 @@ namespace LayarTancep.Data
 
 
 
-        public bool UpdateData(Subscribe data)
+        public bool UpdateData(BlogComment data)
         {
             try
             {
@@ -97,7 +91,7 @@ namespace LayarTancep.Data
 
         public long GetLastId()
         {
-            return db.Subscribes.Max(x => x.Id);
+            return db.BlogComments.Max(x => x.Id);
         }
     }
 

@@ -26,29 +26,24 @@
                     <div class="form-group">
                         <label for="judul">Name</label>
                         <input type="hidden" @bind-value="@TaskObject.Id" />
-                        <InputText id="judul" class="form-control" @bind-Value="@TaskObject.Name" />
-                        <ValidationMessage For="@(() => TaskObject.Name)" />
+                        @if (TaskObject.Id <= 0)
+                        {
+                            <InputText id="judul" class="form-control" @bind-Value="@TaskObject.Name" />
+                            <ValidationMessage For="@(() => TaskObject.Name)" />
+                        }
+                        else
+                        {
+                            <b>@TaskObject.Name</b>
+                        }
                     </div>
 
                     <div class="form-group">
                         <label for="kategori">Kategori</label>
                         <select @bind="TaskObject.Category" id="kategori" class="custom-select">
                             <option value="-">Pilih</option>
-                            <option value="Auto & Vehicle">Auto & Vehicle</option>
-                            <option value="Comedy">Comedy</option>
-                            <option value="Education">Education</option>
-                            <option value="Entertainment">Entertainment</option>
-                            <option value="Film & Animation">Film & Animation</option>
-                            <option value="Gaming">Gaming</option>
-                            <option value="HowTo & Style">HowTo & Style</option>
-                            <option value="Music">Music</option>
-                            <option value="News & Politics">News & Politics</option>
-                            <option value="NonProfits & Activism">NonProfits & Activism</option>
-                            <option value="People & Blogs">People & Blogs</option>
-                            <option value="Pets & Animals">Pets & Animals</option>
-                            <option value="Science & Technology">Science & Technology</option>
-                            <option value="Sports">Sports</option>
-                            <option value="Travel & Events">Travel & Events</option>
+                            @foreach(var cat in ChannelCategories.Categories){
+                            <option value="@cat">@cat</option>
+                            }
 
                         </select>
                         <ValidationMessage For="@(() => TaskObject.Category)" />
@@ -76,7 +71,7 @@
                         <ValidationMessage For="@(() => TaskObject.Twitter)" />
                     </div>
                     <div class="form-group">
-                        <label for="Picture">Picture</label>
+                        <label for="filePicChannel">Profile Picture</label>
                         <InputFile class="uploadButton-input" id="filePicChannel" accept="image/*" multiple OnChange="UploadFiles" />
                         @if (string.IsNullOrEmpty(TaskObject.PicUrl))
                         {
@@ -87,7 +82,18 @@
                             <span class="alert alert-success">Gambar sudah dipilih</span>
                         }
                     </div>
-
+                    <div class="form-group">
+                        <label for="filePicChannel2">Background Picture</label>
+                        <InputFile class="uploadButton-input" id="filePicChannel2" accept="image/*" multiple OnChange="UploadFiles2" />
+                        @if (string.IsNullOrEmpty(TaskObject.BackgroundPicUrl))
+                        {
+                            <span class="alert alert-info">Pilih Gambar</span>
+                        }
+                        else
+                        {
+                            <span class="alert alert-success">Gambar sudah dipilih</span>
+                        }
+                    </div>
                     <button type="submit" class="btn btn-primary">Simpan</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 </EditForm>
@@ -129,12 +135,17 @@
 
         if (TaskObject.Id == 0)
         {
-
+            if (service.IsChannelExist(TaskObject.Name))
+            {
+                toastService.ShowError("Channel sudah ada, pilih nama lain.");
+                return;
+            }
             service.InsertData(TaskObject);
 
         }
         else
         {
+
             service.UpdateData(TaskObject);
         }
 
@@ -172,6 +183,31 @@
             break;
         }
         TaskObject.PicUrl = string.Join(';', fileurls);
+    } 
+    private async Task UploadFiles2(InputFileChangeEventArgs e)
+    {
+        var fileurls = new List<string>();
+        foreach (var file in e.GetMultipleFiles(e.FileCount))
+        {
+
+            //var file = e.File;
+            if (file != null)
+            {
+                var ms = new MemoryStream();
+                await file.OpenReadStream().CopyToAsync(ms);
+                var bytes = ms.ToArray();
+                //var bytes = SKiaImageHelper.FixedSize(ms, 900, 500, false);
+                string newName = string.Empty;
+
+                newName = $"ChannelBackPic_{(string.IsNullOrEmpty(SelUser.Username) ? "rojul" : SelUser.Username)}_{DateTime.Now.ToString("dd_MM_yyyy_HH_mm_ss")}_{file.Name}";
+                var FileUrl = $"{AppConstants.UploadUrlPrefix}{newName}";
+                await AzureBlobHelper.UploadFile(newName, bytes);
+                fileurls.Add(FileUrl);
+
+            }
+            break;
+        }
+        TaskObject.BackgroundPicUrl = string.Join(';', fileurls);
     }
 
 }

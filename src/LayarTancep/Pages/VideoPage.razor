@@ -28,7 +28,7 @@
                                 <div class="video-card-image">
                                     <a class="play-icon" href="@($"video-page/{item.Id}")"><i class="fas fa-play-circle"></i></a>
                                     <a href="@($"video-page/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.ImageUrls)?"img/v2.png":item.ImageUrls)" alt=""></a>
-                                    <div class="time">@(item.Duration != null ? $"{item.Duration.Value.Hours}:{item.Duration.Value.Minutes}:{item.Duration.Value.Seconds}" : "00:00")</div>
+                                    <div class="time">@(item.Duration != null ? $"{String.Format("{0:00}", item.Duration.Value.Hours)}:{String.Format("{0:00}", item.Duration.Value.Minutes)}:{String.Format("{0:00}", item.Duration.Value.Seconds)}" : "00:00")</div>
                                 </div>
                                 <div class="video-card-body">
                                     <div class="btn-group float-right right-action">
@@ -81,6 +81,7 @@
                             <p>@CurrentVideo.About </p>
                             <h6>Tags :</h6>
                             <p class="tags mb-0">
+                                @if(!string.IsNullOrEmpty(CurrentVideo.Tag))
                                 @foreach (var tag in CurrentVideo.Tag.Split(','))
                                 {
                                     <span><a href="#">@tag</a></span>
@@ -178,7 +179,7 @@
                                         <div class="video-card-image">
                                             <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
                                             <a href="@($"video-page/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.ImageUrls)?"img/v1.png":item.ImageUrls)" alt=""></a>
-                                            <div class="time">@(item.Duration != null ? $"{item.Duration.Value.Hours}:{item.Duration.Value.Minutes}:{item.Duration.Value.Seconds}" : "00:00")</div>
+                                            <div class="time">@(item.Duration != null ? $"{String.Format("{0:00}", item.Duration.Value.Hours)}:{String.Format("{0:00}", item.Duration.Value.Minutes)}:{String.Format("{0:00}", item.Duration.Value.Seconds)}" : "00:00")</div>
                                         </div>
                                         <div class="video-card-body">
                                             <div class="btn-group float-right right-action">
@@ -289,6 +290,16 @@
             HasLogin = true;
         }
 
+        Preload();
+        LoadData();
+        if(SelUser!=null && CurrentVideo != null)
+        {
+            var res =HistorySvc.Hit(CurrentVideo,SelUser,new TimeSpan(0,0,0));
+        }
+
+    }
+    void Preload()
+    {
         if (PostId <= 0 && SelUser != null)
         {
             var myvideos = PostSvc.GetByUser(SelUser.Username);
@@ -299,16 +310,7 @@
             NavMgr.NavigateTo("/");
             toastService.ShowInfo("Please select specific video");
         }
-        else
-        {
-            LoadData();
-            if(SelUser!=null && CurrentVideo != null)
-            {
-                var res =HistorySvc.Hit(CurrentVideo,SelUser,new TimeSpan(0,0,0));
-            }
-        }
     }
-
     private async void DataChanged()
     {
         LoadData();
@@ -363,6 +365,7 @@
     }
     protected override async Task OnParametersSetAsync()
     {
+        Preload();
         LoadData();
         if (SelUser != null && CurrentVideo != null)
         {

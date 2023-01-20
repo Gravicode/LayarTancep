@@ -5,6 +5,25 @@ Author URI: https://themeforest.net/user/askbootstrap
 Version: 1.0
 */
 "use strict"; // Start of use strict
+
+function LoadCarousel() {
+    // Category Owl Carousel
+    const objowlcarousel = $('.owl-carousel-category');
+    if (objowlcarousel.length > 0) {
+        objowlcarousel.owlCarousel({
+            
+            loop: true,
+            lazyLoad: true,
+            autoplay: true,
+            autoplaySpeed: 1000,
+            autoplayTimeout: 2000,
+            autoplayHoverPause: true,
+            nav: true,
+            navText: ["<i class='fa fa-chevron-left'></i>", "<i class='fa fa-chevron-right'></i>"],
+        });
+    }
+}
+
 function InitJs() {
   
     // Toggle the side navigation
@@ -23,7 +42,7 @@ function InitJs() {
             e.preventDefault();
         }
     });
-
+    /*
     // Category Owl Carousel
     const objowlcarousel = $('.owl-carousel-category');
     if (objowlcarousel.length > 0) {
@@ -53,7 +72,7 @@ function InitJs() {
             navText: ["<i class='fa fa-chevron-left'></i>", "<i class='fa fa-chevron-right'></i>"],
         });
     }
-
+    */
     // Login Owl Carousel
     const mainslider = $('.owl-carousel-login');
     if (mainslider.length > 0) {

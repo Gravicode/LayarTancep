@@ -10,7 +10,7 @@
 
 
 <div class="single-channel-image">
-    <img class="img-fluid" alt="" src="img/channel-banner.png">
+    <img class="img-fluid" alt="" src="@(string.IsNullOrEmpty(CurrentChannel?.BackgroundPicUrl)?"img/channel-banner.png":CurrentChannel.BackgroundPicUrl)">
     <div class="channel-profile">
         <img class="channel-profile-img" alt="" src="@(string.IsNullOrEmpty(CurrentChannel?.PicUrl)?"img/s2.png":CurrentChannel?.PicUrl)">
         <div class="social hidden-xs">
@@ -33,19 +33,19 @@
                     <a class="nav-link" href="#">Videos <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Playlist</a>
+                    <a class="nav-link" @onclick="NotAvailable" @onclick:preventDefault href="#">Playlist</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Channels</a>
+                    <a class="nav-link" @onclick="NotAvailable" @onclick:preventDefault href="#">Channels</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Discussion</a>
+                    <a class="nav-link" @onclick="NotAvailable" @onclick:preventDefault href="#">Discussion</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">About</a>
+                    <a class="nav-link" @onclick="NotAvailable" @onclick:preventDefault href="#">About</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" @onclick="NotAvailable" @onclick:preventDefault href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Donate
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -86,7 +86,7 @@
                         <div class="video-card-image">
                             <a class="play-icon" href="@($"video-page/{item.Id}")"><i class="fas fa-play-circle"></i></a>
                             <a href="@($"video-page/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.ImageUrls)?"img/v1.png":item.ImageUrls)" alt=""></a>
-                            <div class="time">@(item.Duration != null ? $"{item.Duration.Value.Hours}:{item.Duration.Value.Minutes}:{item.Duration.Value.Seconds}" : "00:00")</div>
+                            <div class="time">@(item.Duration != null ? $"{String.Format("{0:00}", item.Duration.Value.Hours)}:{String.Format("{0:00}", item.Duration.Value.Minutes)}:{String.Format("{0:00}", item.Duration.Value.Seconds)}" : "00:00")</div>
                         </div>
                         <div class="video-card-body">
                             <div class="video-title">
@@ -140,6 +140,11 @@
     public long ChannelId { get; set; }
     [CascadingParameter]
     public MainLayout Layout { get; set; }
+
+    async Task NotAvailable()
+    {
+        toastService.ShowWarning("fitur ini belum tersedia.");
+    }
     protected override async Task OnInitializedAsync()
     {
         if (Layout != null) Layout.AdditionalCss = "single-channel-page";
@@ -152,7 +157,16 @@
             HasLogin = true;
         }
 
-        if (ChannelId <= 0 && SelUser!=null)
+        PreLoad();
+
+
+        LoadData();
+
+    }
+
+    void PreLoad()
+    {
+        if (ChannelId <= 0 && SelUser != null)
         {
             var mychannels = ChannelSvc.GetByUser(SelUser);
             if (mychannels.Any()) ChannelId = mychannels.First().Id;
@@ -167,12 +181,12 @@
             NavMgr.NavigateTo("/");
             toastService.ShowInfo("Please select specific channel");
         }
-        else
-        {
-            LoadData();
-        }
     }
-
+    protected override async Task OnParametersSetAsync()
+    {
+        PreLoad();
+        LoadData();
+    }
     private async void DataChanged()
     {
         LoadData();

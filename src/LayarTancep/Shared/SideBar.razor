@@ -9,29 +9,29 @@
     <li class="nav-item active">
         <a class="nav-link" href="index">
             <i class="fas fa-fw fa-home"></i>
-            <span>Home</span>
+            <span>Beranda</span>
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="channels">
             <i class="fas fa-fw fa-users"></i>
-            <span>Channels</span>
+            <span>Semua Channel</span>
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="single-channel">
             <i class="fas fa-fw fa-user-alt"></i>
-            <span>Single Channel</span>
+            <span>Channel Saya</span>
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="video-page">
             <i class="fas fa-fw fa-video"></i>
-            <span>Video Page</span>
+            <span>Video Saya</span>
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="upload-video">
+        <a class="nav-link" href="upload">
             <i class="fas fa-fw fa-cloud-upload-alt"></i>
             <span>Upload Video</span>
         </a>
@@ -39,13 +39,13 @@
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-folder"></i>
-            <span>Misc</span>
+            <span>Lainnya</span>
         </a>
         <div class="dropdown-menu">            
-            <h6 class="dropdown-header">Other Info:</h6>
+            <h6 class="dropdown-header">Info Lain:</h6>
             <a class="dropdown-item" href="blog">Blog</a>
-            <a class="dropdown-item" href="blog-detail">Blog Detail</a>    
-            <a class="dropdown-item" href="contact">Contact</a>
+           
+            <a class="dropdown-item" href="contact">Kontak</a>
         </div>
     </li>
     <AuthorizeView>
@@ -53,7 +53,7 @@
             <li class="nav-item">
                 <a class="nav-link" href="history-page">
                     <i class="fas fa-fw fa-history"></i>
-                    <span>History Page</span>
+                    <span>Halaman Histori</span>
                 </a>
             </li>
         </Authorized>
@@ -62,7 +62,7 @@
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="categories" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-list-alt"></i>
-            <span>Categories</span>
+            <span>Kategori</span>
         </a>
         <div class="dropdown-menu">
             @foreach (var item in ChannelCategories.Categories)
@@ -73,7 +73,7 @@
         </div>
     </li>
     <li class="nav-item channel-sidebar-list">
-        <h6>SUBSCRIPTIONS</h6>
+        <h6>SUBSCRIPTION SAYA</h6>
         <ul>
             @if (ListSubscribe != null)
                 @foreach (var item in ListSubscribe)
@@ -81,6 +81,7 @@
                     <li>
                         <a href="@($"single-channel/{item.Channel.Id}")">
                             <img class="img-fluid" alt="" src="@(string.IsNullOrEmpty(item.Channel.PicUrl)?"img/s1.png":item.Channel.PicUrl)"> @item.Channel.Name
+                            <span class="badge badge-warning">@item.Channel.Posts.Count</span>
                         </a>
                     </li>
                 }

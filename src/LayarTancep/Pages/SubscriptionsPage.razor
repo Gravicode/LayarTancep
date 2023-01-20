@@ -2,9 +2,13 @@
 @inject IJSRuntime IJS
 @inject NavigationManager NavMgr
 @inject IToastService toastService
-
+@inject ChannelService ChannelSvc
+@inject PostService PostSvc
+@inject UserProfileService UserSvc
+@inject SubscribeService SubscribeSvc
 <div class="container-fluid">
     <div class="video-block section-padding">
+
         <div class="row">
             <div class="col-md-12">
                 <div class="main-title">
@@ -13,208 +17,36 @@
                             Sort by <i class="fa fa-caret-down" aria-hidden="true"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
+                            <a class="dropdown-item" href="#" @onclick:preventDefault @onclick="()=>SetFilter(FilterTypes.Channel,FilterChannels.TopRated)"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
+                            <a class="dropdown-item" href="#" @onclick:preventDefault @onclick="()=>SetFilter(FilterTypes.Channel,FilterChannels.TopViewed)"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
+
                         </div>
                     </div>
                     <h6>Subscriptions</h6>
                 </div>
             </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s1.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-success btn-sm border-none">Subscribe <strong>1.4M</strong></button> <button type="button" class="btn btn-warning btn-sm border-none"><i class="fas fa-times-circle"></i></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></span></a>
+            <Virtualize Items="@ListChannel" Context="item">
+                <div @key="item.Id" class="col-xl-3 col-sm-6 mb-3">
+                    <div class="channels-card">
+                        <div class="channels-card-image">
+                            <a href="@($"/single-channel/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.PicUrl)?"img/s1.png":item.PicUrl)" alt=""></a>
+                            <div class="channels-card-image-btn"><button type="button" @onclick="()=>ToggleSubscribe(item)" class="@((Subscribed.ContainsKey(item.Id) && Subscribed[item.Id]) ?  "btn btn-success btn-sm border-none" :"btn btn-danger btn-sm border-none" )">@((Subscribed.ContainsKey(item.Id) && Subscribed[item.Id]) ? "Subscribed" : "Subscribe") <strong>@NumberHelper.FormatNumber(item.Subscribers.Count)</strong></button> <button type="button" @onclick="()=>RemoveChannel(item)" class="btn btn-warning btn-sm border-none"><i class="fas fa-times-circle"></i></button></div>
                         </div>
-                        <div class="channels-view">
-                            382,323 subscribers
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s2.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-danger btn-sm border-none">Subscribe <strong>1.4M</strong></button> <button type="button" class="btn btn-warning btn-sm border-none"><i class="fas fa-times-circle"></i></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name</a>
-                        </div>
-                        <div class="channels-view">
-                            382,323 subscribers
+                        <div class="channels-card-body">
+                            <div class="channels-title">
+                                <a href="@($"/single-channel/{item.Id}")">@item.Name <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></span></a>
+                            </div>
+                            <div class="channels-view">
+                                @item.Subscribers.Count.ToString("n0") subscribers
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s3.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-secondary btn-sm border-none">Subscribed <strong>1.4M</strong></button> <button type="button" class="btn btn-warning btn-sm border-none"><i class="fas fa-times-circle"></i></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle"></i></span></a>
-                        </div>
-                        <div class="channels-view">
-                            382,323 subscribers
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s4.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-danger btn-sm border-none">Subscribe <strong>1.4M</strong></button> <button type="button" class="btn btn-warning btn-sm border-none"><i class="fas fa-times-circle"></i></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name</a>
-                        </div>
-                        <div class="channels-view">
-                            382,323 subscribers
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s6.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-danger btn-sm border-none">Subscribe <strong>1.4M</strong></button> <button type="button" class="btn btn-warning btn-sm border-none"><i class="fas fa-times-circle"></i></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name</a>
-                        </div>
-                        <div class="channels-view">
-                            382,323 subscribers
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s8.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-danger btn-sm border-none">Subscribe <strong>1.4M</strong></button> <button type="button" class="btn btn-warning btn-sm border-none"><i class="fas fa-times-circle"></i></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name</a>
-                        </div>
-                        <div class="channels-view">
-                            382,323 subscribers
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s5.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-danger btn-sm border-none">Subscribe <strong>1.4M</strong></button> <button type="button" class="btn btn-warning btn-sm border-none"><i class="fas fa-times-circle"></i></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name</a>
-                        </div>
-                        <div class="channels-view">
-                            382,323 subscribers
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s6.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-danger btn-sm border-none">Subscribe <strong>1.4M</strong></button> <button type="button" class="btn btn-warning btn-sm border-none"><i class="fas fa-times-circle"></i></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name</a>
-                        </div>
-                        <div class="channels-view">
-                            382,323 subscribers
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s8.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-danger btn-sm border-none">Subscribe <strong>1.4M</strong></button> <button type="button" class="btn btn-warning btn-sm border-none"><i class="fas fa-times-circle"></i></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name</a>
-                        </div>
-                        <div class="channels-view">
-                            382,323 subscribers
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s7.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-secondary btn-sm border-none">Subscribed <strong>1.4M</strong></button> <button type="button" class="btn btn-warning btn-sm border-none"><i class="fas fa-times-circle"></i></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle"></i></span></a>
-                        </div>
-                        <div class="channels-view">
-                            382,323 subscribers
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s1.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-danger btn-sm border-none">Subscribe <strong>1.4M</strong></button> <button type="button" class="btn btn-warning btn-sm border-none"><i class="fas fa-times-circle"></i></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name</a>
-                        </div>
-                        <div class="channels-view">
-                            382,323 subscribers
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="channels-card">
-                    <div class="channels-card-image">
-                        <a href="#"><img class="img-fluid" src="img/s2.png" alt=""></a>
-                        <div class="channels-card-image-btn"><button type="button" class="btn btn-danger btn-sm border-none">Subscribe <strong>1.4M</strong></button> <button type="button" class="btn btn-warning btn-sm border-none"><i class="fas fa-times-circle"></i></button></div>
-                    </div>
-                    <div class="channels-card-body">
-                        <div class="channels-title">
-                            <a href="#">Channels Name</a>
-                        </div>
-                        <div class="channels-view">
-                            382,323 subscribers
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+            </Virtualize>
+
         </div>
-        <nav aria-label="Page navigation example">
+        <nav style="display:none" aria-label="Page navigation example">
             <ul class="pagination justify-content-center pagination-sm mb-0">
                 <li class="page-item disabled">
                     <a class="page-link" href="#" tabindex="-1">Previous</a>
@@ -229,6 +61,98 @@
         </nav>
     </div>
 </div>
+
 @code {
 
+    public string FilterChannel { get; set; } = FilterChannels.TopViewed;
+    public string FilterFeatured { get; set; } = FilterChannels.TopViewed;
+    public UserProfile SelUser { get; set; }
+    string UserName { set; get; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    public List<Channel> ListChannel { get; set; } = new();
+    public Dictionary<long, bool> Subscribed { get; set; } = new();
+    bool HasLogin = false;
+
+    private async void DataChanged()
+    {
+        LoadData();
+        StateHasChanged();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+
+        var user = (await authenticationStateTask).User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserName = user.Identity.Name;
+            SelUser = UserSvc.GetItemByUsername(UserName);
+            HasLogin = true;
+        }
+        LoadData();
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        LoadData();
+    }
+    public enum FilterTypes { Channel, Featured }
+    void SetFilter(FilterTypes filterType, string Filter)
+    {
+        if (filterType == FilterTypes.Channel)
+        {
+            FilterChannel = Filter;
+        }
+        else
+        {
+            FilterFeatured = Filter;
+        }
+        LoadData();
+    }
+
+    void LoadData()
+    {
+        if (!HasLogin) return;
+
+        var datas = SubscribeSvc.GetAllData(UserName);
+        ListChannel = datas.Select(c => c.Channel).ToList();
+        Subscribed.Clear();
+        if (!string.IsNullOrEmpty(UserName))
+            foreach (var channel in ListChannel)
+            {
+                Subscribed.Add(channel.Id, channel.Subscribers.Any(x => x.UserId == SelUser.Id));
+            }
+    }
+    async Task<bool> RemoveChannel(Channel item)
+    {
+        return ListChannel.Remove(item);
+    }
+    async Task OpenChannel(Channel item)
+    {
+        NavMgr.NavigateTo($"/single-channel/{item.Id}");
+    }
+
+    async Task ToggleSubscribe(Channel item)
+    {
+        if (!HasLogin)
+        {
+            toastService.ShowWarning("Please login first.");
+            return;
+        }
+        if (item.UserName == SelUser.Username)
+        {
+            toastService.ShowWarning("Kamu ga bisa subscribe channel sendiri.");
+            return;
+        }
+        var state = !Subscribed[item.Id];
+        if (state)
+        {
+            ChannelSvc.Subscribe(SelUser.Id, SelUser.Username, item.Id);
+        }
+        else
+        {
+            ChannelSvc.UnSubscribe(SelUser.Id, item.Id);
+        }
+        Subscribed[item.Id] = state;
+    }
 }

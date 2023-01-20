@@ -9,208 +9,210 @@
 @inject ChannelService ChannelSvc
 @inject PostService PostSvc
 @inject UserProfileService UserSvc
+@inject HistoryService HistorySvc
 
-@if (CurrentVideo != null) { 
-<div class="container-fluid pb-0">
-    <div class="video-block-right-list section-padding">
-        <div class="row mb-4">
-            <div class="col-md-8">
-                <div class="single-video">
-                    <VideoPlayer VideoUrls="@VideoUrl" PosterUrl="@CurrentVideo?.ImageUrls"></VideoPlayer>
+@if (CurrentVideo != null)
+{
+    <div class="container-fluid pb-0">
+        <div class="video-block-right-list section-padding">
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="single-video">
+                        <VideoPlayer VideoUrls="@VideoUrl" PosterUrl="@CurrentVideo?.ImageUrls"></VideoPlayer>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="video-slider-right-list">
-                    <Virtualize Items="@ListVideo" Context="item">
-                        <div @key="item.Id" class="video-card video-card-list @(item.Id == CurrentVideo.Id ? "Active" : "")">
-                            <div class="video-card-image">
-                                <a class="play-icon" href="@($"video-page/{item.Id}")"><i class="fas fa-play-circle"></i></a>
-                                <a href="@($"video-page/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.ImageUrls)?"img/v2.png":item.ImageUrls)" alt=""></a>
-                                <div class="time">@(item.Duration != null ? $"{item.Duration.Value.Hours}:{item.Duration.Value.Minutes}:{item.Duration.Value.Seconds}" : "00:00")</div>
-                            </div>
-                            <div class="video-card-body">
-                                <div class="btn-group float-right right-action">
-                                    <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-right">
-                                        <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                        <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                        <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
+                <div class="col-md-4">
+                    <div class="video-slider-right-list">
+                        <Virtualize Items="@ListVideo" Context="item">
+                            <div @key="item.Id" class="video-card video-card-list @(item.Id == CurrentVideo.Id ? "Active" : "")">
+                                <div class="video-card-image">
+                                    <a class="play-icon" href="@($"video-page/{item.Id}")"><i class="fas fa-play-circle"></i></a>
+                                    <a href="@($"video-page/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.ImageUrls)?"img/v2.png":item.ImageUrls)" alt=""></a>
+                                    <div class="time">@(item.Duration != null ? $"{item.Duration.Value.Hours}:{item.Duration.Value.Minutes}:{item.Duration.Value.Seconds}" : "00:00")</div>
+                                </div>
+                                <div class="video-card-body">
+                                    <div class="btn-group float-right right-action">
+                                        <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
+                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
+                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
+                                        </div>
+                                    </div>
+                                    <div class="video-title">
+                                        <a href="@($"video-page/{item.Id}")">@item.Title</a>
+                                    </div>
+                                    <div class="video-page text-success">
+                                        @item.Category  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
+                                    </div>
+                                    <div class="video-view">
+                                        @NumberHelper.FormatNumber(item.PostViews.Count)  views &nbsp;<i class="fas fa-calendar-alt"></i> @DateHelper.GetElapsedTime(item.CreatedDate)
                                     </div>
                                 </div>
-                                <div class="video-title">
-                                    <a href="@($"video-page/{item.Id}")">@item.Title</a>
-                                </div>
-                                <div class="video-page text-success">
-                                    @item.Category  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                                </div>
-                                <div class="video-view">
-                                    @NumberHelper.FormatNumber(item.PostViews.Count)  views &nbsp;<i class="fas fa-calendar-alt"></i> @DateHelper.GetElapsedTime(item.CreatedDate)
-                                </div>
                             </div>
-                        </div>
 
-                    </Virtualize>
+                        </Virtualize>
 
 
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="video-block section-padding">
-        <div class="row">
-            <div class="col-md-8">
-                <div class="single-video-left">
-                    <div class="single-video-title box mb-3">
-                        <h2><a href="#">@CurrentVideo?.Title</a></h2>
-                        <p class="mb-0"><i class="fas fa-eye"></i> @CurrentVideo?.PostViews.Count.ToString("n0") views</p>
-                    </div>
-                    <div class="single-video-author box mb-3">
-                        <div class="float-right"><button class="btn btn-danger" @onclick="ToggleSubscribe" type="button">@((Subscribed ? "Subscribed" : "Subscribe"))  <strong>@(CurrentChannel == null ? 0 : NumberHelper.FormatNumber(CurrentChannel.Subscribers.Count))</strong></button> <button class="btn btn @(Notified ? "btn-outline-success":"btn-outline-danger")" type="button" @onclick="ToggleNotification"><i class="fas fa-bell"></i></button></div>
-                        <img class="img-fluid" src="@(string.IsNullOrEmpty(CurrentChannel.PicUrl)?"img/s4.png":CurrentChannel.PicUrl)" alt="">
-                        <p><a href="#"><strong>@CurrentChannel.Name</strong></a> <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></span></p>
-                        <small>Published on @CurrentVideo.CreatedDate.ToString("MMM dd, yyyy")</small>
-                    </div>
-                    <div class="single-video-info-content box mb-3">
-                        <h6>Category :</h6>
-                        <p>@CurrentVideo.Category</p>
-                        <h6>About :</h6>
-                        <p>@CurrentVideo.About </p>
-                        <h6>Tags :</h6>
-                        <p class="tags mb-0">
-                            @foreach (var tag in CurrentVideo.Tag.Split(','))
-                            {
-                                <span><a href="#">@tag</a></span>
-                            }
-                        </p>
-                    </div>
-                    <div class="box mb-3 single-video-comment-tabs">
-                        <ul class="nav nav-tabs" role="tablist">
-                            <li class="nav-item">
-                                <a class="nav-link active" id="retro-comments-tab" data-toggle="tab" href="#retro-comments" role="tab" aria-controls="retro" aria-selected="false">Komentar</a>
-                            </li>
-                        </ul>
-                        <div class="tab-content">
-                            <div class="tab-pane fade show active" id="retro-comments" role="tabpanel" aria-labelledby="retro-comments-tab">
-                                <AuthorizeView>
-                                    <Authorized>
-                                        <div class="reviews-members pt-0">
-                                            <div class="media">
-                                                <a href="#"><img class="mr-3" src="@(string.IsNullOrEmpty(SelUser?.PicUrl)?"img/s1.png":SelUser.PicUrl)" alt="Generic placeholder image"></a>
-                                                <div class="media-body">
-                                                    <div class="form-members-body">
-                                                        <textarea rows="1" @bind="NewComment" @onkeyup="KeyUp" placeholder="Add a public comment..." class="form-control"></textarea>
-                                                    </div>
-                                                    <div class="form-members-footer text-right mt-2">
-                                                        <b class="float-left">
-                                                            @CurrentVideo.PostComments.Count.ToString("n0") Comments
-                                                        </b>
-                                                        <button @onclick="ClearComment" class="btn btn-outline-danger btn-sm" type="button">CANCEL</button> <button @onclick="AddComment" class="btn btn-danger btn-sm" type="button">COMMENT</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Authorized>
-                                </AuthorizeView>
-                                @foreach (var comment in CurrentVideo.PostComments)
+        <div class="video-block section-padding">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="single-video-left">
+                        <div class="single-video-title box mb-3">
+                            <h2><a href="#">@CurrentVideo?.Title</a></h2>
+                            <p class="mb-0"><i class="fas fa-eye"></i> @CurrentVideo?.PostViews.Count.ToString("n0") views</p>
+                        </div>
+                        <div class="single-video-author box mb-3">
+                            <div class="float-right"><button class="btn btn-danger" @onclick="ToggleSubscribe" type="button">@((Subscribed ? "Subscribed" : "Subscribe"))  <strong>@(CurrentChannel == null ? 0 : NumberHelper.FormatNumber(CurrentChannel.Subscribers.Count))</strong></button> <button class="btn btn @(Notified ? "btn-outline-success":"btn-outline-danger")" type="button" @onclick="ToggleNotification"><i class="fas fa-bell"></i></button></div>
+                            <img class="img-fluid" src="@(string.IsNullOrEmpty(CurrentChannel.PicUrl)?"img/s4.png":CurrentChannel.PicUrl)" alt="">
+                            <p><a href="#"><strong>@CurrentChannel.Name</strong></a> <span title="" data-placement="top" data-toggle="tooltip" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></span></p>
+                            <small>Published on @CurrentVideo.CreatedDate.ToString("MMM dd, yyyy")</small>
+                        </div>
+                        <div class="single-video-info-content box mb-3">
+                            <h6>Category :</h6>
+                            <p>@CurrentVideo.Category</p>
+                            <h6>About :</h6>
+                            <p>@CurrentVideo.About </p>
+                            <h6>Tags :</h6>
+                            <p class="tags mb-0">
+                                @foreach (var tag in CurrentVideo.Tag.Split(','))
                                 {
-                                    <div class="reviews-members">
-                                        <div class="media">
-                                            <a href="#"><img class="mr-3" src="@(string.IsNullOrEmpty(comment.User.PicUrl)?"img/s2.png":comment.User.PicUrl)" alt="Generic placeholder image"></a>
-                                            <div class="media-body">
-                                                <div class="reviews-members-header">
-                                                    <h6 class="mb-1"><a class="text-black" href="#">@comment.User.FullName </a> <small class="text-gray">@DateHelper.GetElapsedTime(comment.CreatedDate)</small></h6>
+                                    <span><a href="#">@tag</a></span>
+                                }
+                            </p>
+                        </div>
+                        <div class="box mb-3 single-video-comment-tabs">
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="retro-comments-tab" data-toggle="tab" href="#retro-comments" role="tab" aria-controls="retro" aria-selected="false">Komentar</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="retro-comments" role="tabpanel" aria-labelledby="retro-comments-tab">
+                                    <AuthorizeView>
+                                        <Authorized>
+                                            <div class="reviews-members pt-0">
+                                                <div class="media">
+                                                    <a href="#"><img class="mr-3" src="@(string.IsNullOrEmpty(SelUser?.PicUrl)?"img/s1.png":SelUser.PicUrl)" alt="Generic placeholder image"></a>
+                                                    <div class="media-body">
+                                                        <div class="form-members-body">
+                                                            <textarea rows="1" @bind="NewComment" @onkeyup="KeyUp" placeholder="Add a public comment..." class="form-control"></textarea>
+                                                        </div>
+                                                        <div class="form-members-footer text-right mt-2">
+                                                            <b class="float-left">
+                                                                @CurrentVideo.PostComments.Count.ToString("n0") Comments
+                                                            </b>
+                                                            <button @onclick="ClearComment" class="btn btn-outline-danger btn-sm" type="button">CANCEL</button> <button @onclick="AddComment" class="btn btn-danger btn-sm" type="button">COMMENT</button>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div class="reviews-members-body">
-                                                    <p> @comment.Comment</p>
-                                                </div>
-                                                <div class="reviews-members-footer">
-                                                    <a class="total-like" @onclick:preventDefault @onclick="()=>LikeComment(comment)" href="#"><i class="fas fa-thumbs-up"></i> @comment.CommentLikes.Count.ToString("n0")</a> <a class="total-like" @onclick:preventDefault @onclick="()=>UnLikeComment(comment)" href="#"><i class="fas fa-thumbs-down"></i> @comment.CommentUnlikes.Count.ToString("n0")</a>
-                                                    <span dir="rtl" class="total-like-user-main ml-2">
-                                                        @if (comment.CommentLikes.Count > 0)
-                                                            foreach (var commentlike in comment.CommentLikes.Take(4))
-                                                            {
-                                                                <a href="#" title="@commentlike.LikedByUser.FullName" data-placement="top" data-toggle="tooltip"><img class="total-like-user" src="@(string.IsNullOrEmpty(@commentlike.LikedByUser.PicUrl)?"img/s1.png":@commentlike.LikedByUser.PicUrl)" alt="Generic placeholder image"></a>
-                                                            }
+                                            </div>
+                                        </Authorized>
+                                    </AuthorizeView>
+                                    @foreach (var comment in CurrentVideo.PostComments)
+                                    {
+                                        <div class="reviews-members">
+                                            <div class="media">
+                                                <a href="#"><img class="mr-3" src="@(string.IsNullOrEmpty(comment.User.PicUrl)?"img/s2.png":comment.User.PicUrl)" alt="Generic placeholder image"></a>
+                                                <div class="media-body">
+                                                    <div class="reviews-members-header">
+                                                        <h6 class="mb-1"><a class="text-black" href="#">@comment.User.FullName </a> <small class="text-gray">@DateHelper.GetElapsedTime(comment.CreatedDate)</small></h6>
+                                                    </div>
+                                                    <div class="reviews-members-body">
+                                                        <p> @comment.Comment</p>
+                                                    </div>
+                                                    <div class="reviews-members-footer">
+                                                        <a class="total-like" @onclick:preventDefault @onclick="()=>LikeComment(comment)" href="#"><i class="fas fa-thumbs-up"></i> @comment.CommentLikes.Count.ToString("n0")</a> <a class="total-like" @onclick:preventDefault @onclick="()=>UnLikeComment(comment)" href="#"><i class="fas fa-thumbs-down"></i> @comment.CommentUnlikes.Count.ToString("n0")</a>
+                                                        <span dir="rtl" class="total-like-user-main ml-2">
+                                                            @if (comment.CommentLikes.Count > 0)
+                                                                foreach (var commentlike in comment.CommentLikes.Take(4))
+                                                                {
+                                                                    <a href="#" title="@commentlike.LikedByUser.FullName" data-placement="top" data-toggle="tooltip"><img class="total-like-user" src="@(string.IsNullOrEmpty(@commentlike.LikedByUser.PicUrl)?"img/s1.png":@commentlike.LikedByUser.PicUrl)" alt="Generic placeholder image"></a>
+                                                                }
 
-                                                    </span>
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                }
+                                    }
 
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="single-video-right">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="adblock">
-                                <div class="img">
-                                    Space Iklan<br>
-                                    336 x 280
-                                </div>
-                            </div>
-                            <div class="main-title">
-                                <div class="btn-group float-right right-action">
-                                    <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Sort by <i class="fa fa-caret-down" aria-hidden="true"></i>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-right">
-                                        <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                        <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                        <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
+                <div class="col-md-4">
+                    <div class="single-video-right">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="adblock">
+                                    <div class="img">
+                                        Space Iklan<br>
+                                        336 x 280
                                     </div>
                                 </div>
-                                <h6>Up Next</h6>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <Virtualize Items="@ListOtherVideo" Context="item">
-                                <div @key="item.Id" class="video-card video-card-list">
-                                    <div class="video-card-image">
-                                        <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
-                                        <a href="@($"video-page/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.ImageUrls)?"img/v1.png":item.ImageUrls)" alt=""></a>
-                                        <div class="time">@(item.Duration != null ? $"{item.Duration.Value.Hours}:{item.Duration.Value.Minutes}:{item.Duration.Value.Seconds}" : "00:00")</div>
+                                <div class="main-title">
+                                    <div class="btn-group float-right right-action">
+                                        <a href="#" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Sort by <i class="fa fa-caret-down" aria-hidden="true"></i>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
+                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
+                                            <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
+                                        </div>
                                     </div>
-                                    <div class="video-card-body">
-                                        <div class="btn-group float-right right-action">
-                                            <a href="@($"video-page/{item.Id}")" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-right">
-                                                <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
-                                                <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
-                                                <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
+                                    <h6>Up Next</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <Virtualize Items="@ListOtherVideo" Context="item">
+                                    <div @key="item.Id" class="video-card video-card-list">
+                                        <div class="video-card-image">
+                                            <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
+                                            <a href="@($"video-page/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.ImageUrls)?"img/v1.png":item.ImageUrls)" alt=""></a>
+                                            <div class="time">@(item.Duration != null ? $"{item.Duration.Value.Hours}:{item.Duration.Value.Minutes}:{item.Duration.Value.Seconds}" : "00:00")</div>
+                                        </div>
+                                        <div class="video-card-body">
+                                            <div class="btn-group float-right right-action">
+                                                <a href="@($"video-page/{item.Id}")" class="right-action-link text-gray" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-right">
+                                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-star"></i> &nbsp; Top Rated</a>
+                                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-signal"></i> &nbsp; Viewed</a>
+                                                    <a class="dropdown-item" href="#"><i class="fas fa-fw fa-times-circle"></i> &nbsp; Close</a>
+                                                </div>
+                                            </div>
+                                            <div class="video-title">
+                                                <a href="@($"video-page/{item.Id}")">@item.Title</a>
+                                            </div>
+                                            <div class="video-page text-success">
+                                                @item.Category  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
+                                            </div>
+                                            <div class="video-view">
+                                                @NumberHelper.FormatNumber(item.PostViews.Count) views &nbsp;<i class="fas fa-calendar-alt"></i> @DateHelper.GetElapsedTime(item.CreatedDate)
                                             </div>
                                         </div>
-                                        <div class="video-title">
-                                            <a href="@($"video-page/{item.Id}")">@item.Title</a>
-                                        </div>
-                                        <div class="video-page text-success">
-                                            @item.Category  <a title="" data-placement="top" data-toggle="tooltip" href="#" data-original-title="Verified"><i class="fas fa-check-circle text-success"></i></a>
-                                        </div>
-                                        <div class="video-view">
-                                            @NumberHelper.FormatNumber(item.PostViews.Count) views &nbsp;<i class="fas fa-calendar-alt"></i> @DateHelper.GetElapsedTime(item.CreatedDate)
-                                        </div>
                                     </div>
-                                </div>
 
-                            </Virtualize>
+                                </Virtualize>
 
 
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 }
 @code {
     Dictionary<long, bool> Liked { set; get; } = new();
@@ -287,7 +289,7 @@
             HasLogin = true;
         }
 
-        if (PostId <= 0 && SelUser!=null)
+        if (PostId <= 0 && SelUser != null)
         {
             var myvideos = PostSvc.GetByUser(SelUser.Username);
             if (myvideos.Any()) PostId = myvideos.First().Id;
@@ -300,6 +302,10 @@
         else
         {
             LoadData();
+            if(SelUser!=null && CurrentVideo != null)
+            {
+                var res =HistorySvc.Hit(CurrentVideo,SelUser,new TimeSpan(0,0,0));
+            }
         }
     }
 
@@ -358,6 +364,10 @@
     protected override async Task OnParametersSetAsync()
     {
         LoadData();
+        if (SelUser != null && CurrentVideo != null)
+        {
+            var res = HistorySvc.Hit(CurrentVideo, SelUser, new TimeSpan(0, 0, 0));
+        }
     }
     async Task OpenChannel(Channel item)
     {

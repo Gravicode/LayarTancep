@@ -1,6 +1,7 @@
 ﻿using GemBox.Document;
 using GoogleMapsComponents.Maps;
 using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
@@ -92,7 +93,22 @@ namespace LayarTancep.Models
         public bool IsSucceed { get; set; }
     }
     #endregion
+    [Table("page_view")]
+    public class PageView
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column(Order = 0)]
+        public long Id { get; set; }
 
+        public string PageName { set; get; }
+        public string PageUrl { set; get; }
+        [ForeignKey(nameof(User)), Column(Order = 0)]
+        public long UserId { get; set; }
+        public UserProfile User { set; get; }
+        public string UserName { set; get; }
+        public string Agent { set; get; }
+        public DateTime HitDate { set; get; }
+    }
     [Table("history")]
     public class History
     {

@@ -11,7 +11,6 @@ using PdfSharp.Charting;
 using System.Net;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using LayarTancep.Models;
-using LayarTancep.Data;
 using Xabe.FFmpeg.Downloader;
 using Xabe.FFmpeg;
 
@@ -59,6 +58,7 @@ builder.Services.AddTransient<CommentLikeService>();
 builder.Services.AddTransient<PostService>();
 builder.Services.AddTransient<HistoryService>();
 builder.Services.AddTransient<CommentUnlikeService>();
+builder.Services.AddTransient<PageViewService>();
 
 builder.Services.AddCors(options =>
 {

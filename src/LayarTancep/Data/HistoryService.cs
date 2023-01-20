@@ -25,6 +25,22 @@ namespace LayarTancep.Data
             return true;
         }
 
+        public bool Hit(Post post, UserProfile user, TimeSpan duration)
+        {
+            var exist = db.Historys.Where(x => x.UserId == user.Id && x.PostId == post.Id).FirstOrDefault();
+            if (exist != null)
+            {
+                exist.UpdatedDate = DateHelper.GetLocalTimeNow();
+                exist.LastWatch = duration;
+                return UpdateData(exist);
+            }
+            else
+            {
+                var newHist = new History() { CreatedDate = DateHelper.GetLocalTimeNow(), LastWatch = duration, PostId = post.Id, UpdatedDate = DateHelper.GetLocalTimeNow(), UserId = user.Id, UserName = user.Username };
+                return InsertData(newHist);
+            }
+        }
+
         public List<History> FindByKeyword(string Keyword)
         {
             var data = from x in db.Historys
@@ -37,7 +53,12 @@ namespace LayarTancep.Data
         {
             return db.Historys.OrderBy(x => x.Id).ToList();
         }
-
+        public List<History> GetHistory(string UserName)
+        {
+            return db.Historys.Include(c=>c.Post).
+                ThenInclude(c=>c.PostViews)
+                .Where(x=>x.UserName == UserName).OrderByDescending(x => x.CreatedDate).ToList();
+        }
         public History GetDataById(object Id)
         {
             return db.Historys.Where(x => x.Id == (long)Id).FirstOrDefault();

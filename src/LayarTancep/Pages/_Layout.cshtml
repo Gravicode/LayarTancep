@@ -70,6 +70,16 @@
 
     <script>
         var player = null;
+        function ReloadVideo(videoid,urlvid){
+            //var video = document.getElementById(videoid);
+            var source = document.getElementById('vid-src');
+            //$("ELEMENT").click(function() {
+            player.pause();
+            source.setAttribute('src', urlvid);
+            player.load();
+            player.play();
+            //});
+        }
         function GetCurrentTimeVideo(videoid){
             if( player!=null){
                 var whereYouAt = player.currentTime;

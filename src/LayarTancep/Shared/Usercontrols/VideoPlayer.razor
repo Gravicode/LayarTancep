@@ -1,43 +1,92 @@
 ﻿@inject IJSRuntime IJS
-<video id="@VideoId"
+<BlazoredVideo id="@VideoId" @ref="player" Play="OnPlay" TimeUpdate="OnTimeUpdate"
+               class="w-100" 
+               VideoEventOptions="@VideoEventOptions"
+               
+               controls="controls">
+               @foreach (var videoUrl in VideoUrls)
+                {
+                    @if (!string.IsNullOrEmpty(videoUrl))
+                    {
+                        <source src="@videoUrl" type="video/mp4" />           
+                    }
+     
+                }
+</BlazoredVideo>
+@*<video id="@VideoId"
        class="video-js"
        controls
        preload="auto"
-    
+
        poster="@PosterUrl"
        data-setup="{}">
-       
+
     @foreach (var videoUrl in VideoUrls)
     {
         @if (!string.IsNullOrEmpty(videoUrl))
         {
-            <source src="@videoUrl" type="video/@(Path.GetExtension(videoUrl).Replace(".",string.Empty))" />
+            <source id="vid-src" src="@videoUrl" type="video/@(Path.GetExtension(videoUrl).Replace(".",string.Empty))" />
         }
-     
+
     }
     <p class="vjs-no-js">
         To view this video please enable JavaScript, and consider upgrading to a
         web browser that
         <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
     </p>
-</video>
+</video>*@
 @code {
+    BlazoredVideo player;
+    [Parameter]
+    public Dictionary<VideoEvents, VideoStateOptions> VideoEventOptions { get; set; } = new();
     //SetVideoFluid
-    public string VideoId { get; set; } = $"my-video-{Tools.NumberGen.GenerateNumber(5)}";
+    public string VideoId { get; set; } = GenerateId();
     [Parameter]
     public string PosterUrl { get; set; } = "MY_VIDEO_POSTER.jpg";
     [Parameter]
     public List<string> VideoUrls { get; set; } = new() { };
+    public TimeSpan CurrentTime { get; set; } = new();
+    protected override async Task OnInitializedAsync()
+    {
+        VideoEventOptions[VideoEvents.TimeUpdate] = new VideoStateOptions { CurrentTime = true, CurrentSrc = true };
+        VideoEventOptions[VideoEvents.Play] = new VideoStateOptions { CurrentSrc = true, Autoplay=true };
 
+    }
+    void OnPlay(VideoState state)
+    {
+        var url = state.CurrentSrc;
+        // do something with this
+    }
+    void OnTimeUpdate(VideoState state)
+    {
+        var url = state.CurrentSrc;
+
+        CurrentTime = new TimeSpan(0, 0, (int)state.CurrentTime);
+        // do something with this
+    }
+    static string GenerateId()
+    {
+        return $"my-video-{Tools.NumberGen.GenerateNumber(5)}";
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-
-
         if (firstRender)
         {
-            await IJS.InvokeVoidAsync("SetVideoFluid", VideoId);
+            //await IJS.InvokeVoidAsync("SetVideoFluid", VideoId);
         }
+    }
 
+    public async Task Refresh()
+    {
+        //bug       
+        await player.ReloadControl();
+        await player.ReloadControl();
+
+        //await player.ReloadControl();
+        //Console.WriteLine(PosterUrl);
+        //var url = VideoUrls.First();
+        //await IJS.InvokeVoidAsync("ReloadVideo", VideoId,url );
+        //ReloadVideo
     }
 }
 

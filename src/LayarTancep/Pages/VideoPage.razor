@@ -216,7 +216,7 @@
     </div>
 }
 @code {
-   
+
     VideoPlayer player;
     Dictionary<long, bool> Liked { set; get; } = new();
     Dictionary<long, bool> UnLiked { set; get; } = new();
@@ -298,25 +298,25 @@
         {
             var res =HistorySvc.Hit(CurrentVideo,SelUser,new TimeSpan(0,0,0));
         }
-        /*
-        timer=new  BlazorTimer ();
-        timer.SetTimer(5000);
-        timer.OnElapsed += () =>
-        {
-            try
-        {
-                if (CurrentVideo != null && player!=null)
-                {
+                /*
+                timer=new  BlazorTimer ();
+                timer.SetTimer(5000);
+                    timer.OnElapsed += () =>
+                    {
+                    try
+                    {
+                    if (CurrentVideo != null && player!=null)
+                    {
                     dynamic time = IJS.InvokeAsync<string>("GetCurrentTimeVideo",player.VideoId);
                     var res = HistorySvc.Hit(CurrentVideo, SelUser, new TimeSpan(0, 0, 0));
-                }
+            }
             }
         catch (Exception)
         {
-            
-            throw;
+
+        throw;
         }
-           
+
         };*/
     }
     void Preload()
@@ -392,6 +392,7 @@
         {
             var res = HistorySvc.Hit(CurrentVideo, SelUser, new TimeSpan(0, 0, 0));
         }
+        if (player != null) player.Refresh();
     }
     async Task OpenChannel(Channel item)
     {

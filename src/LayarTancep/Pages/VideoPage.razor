@@ -177,7 +177,7 @@
                                 <Virtualize Items="@ListOtherVideo" Context="item">
                                     <div @key="item.Id" class="video-card video-card-list">
                                         <div class="video-card-image">
-                                            <a class="play-icon" href="#"><i class="fas fa-play-circle"></i></a>
+                                            <a class="play-icon" href="@($"video-page/{item.Id}")"><i class="fas fa-play-circle"></i></a>
                                             <a href="@($"video-page/{item.Id}")"><img class="img-fluid" src="@(string.IsNullOrEmpty(item.ImageUrls)?"img/v1.png":item.ImageUrls)" alt=""></a>
                                             <div class="time">@(item.Duration != null ? $"{String.Format("{0:00}", item.Duration.Value.Hours)}:{String.Format("{0:00}", item.Duration.Value.Minutes)}:{String.Format("{0:00}", item.Duration.Value.Seconds)}" : "00:00")</div>
                                         </div>
